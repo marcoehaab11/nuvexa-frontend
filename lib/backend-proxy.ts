@@ -8,12 +8,17 @@ export async function proxyBackend(request: NextRequest, path: string) {
   const cookie = request.headers.get("cookie");
   if (contentType) headers.set("content-type", contentType);
   if (cookie) headers.set("cookie", cookie);
-  const upstream = await fetch(`${apiBase()}${path}`, {
-    method: request.method,
-    headers,
-    body: request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer(),
-    cache: "no-store",
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${apiBase()}${path}`, {
+      method: request.method,
+      headers,
+      body: request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer(),
+      cache: "no-store",
+    });
+  } catch {
+    return Response.json({ message: "The NUVEXA API is not configured or is temporarily unavailable." }, { status: 503 });
+  }
   const responseHeaders = new Headers();
   const upstreamType = upstream.headers.get("content-type");
   const setCookie = upstream.headers.get("set-cookie");
