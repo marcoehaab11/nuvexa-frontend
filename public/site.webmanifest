@@ -1,0 +1,14 @@
+{
+  "name": "NUVEXA Properties",
+  "short_name": "NUVEXA",
+  "icons": [
+    {
+      "src": "/favicon-nuvexa.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#0d1b2a",
+  "background_color": "#0d1b2a",
+  "display": "standalone"
+}

@@ -10,12 +10,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://nuvexa.com"),
   title: { default: "NUVEXA Properties — Exceptional places. Considered living.", template: "%s | NUVEXA" },
   description: "A considered collection of exceptional properties and landmark developments across Egypt and beyond.",
+  manifest: "/site.webmanifest",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "32x32" },
       { url: "/favicon-nuvexa.png", type: "image/png", sizes: "512x512" },
     ],
-    shortcut: "/favicon.ico",
+    shortcut: "/favicon.svg",
     apple: "/favicon-nuvexa.png",
   },
   openGraph: { title: "NUVEXA Properties", description: "Exceptional places. Considered living.", type: "website", locale: "ar_EG", images: [{ url: "/og.png", width: 1536, height: 1024, alt: "NUVEXA Properties — Exceptional places. Considered living." }] },
