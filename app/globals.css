@@ -33,9 +33,9 @@
   .menu-button{position:absolute;right:16px;display:grid;width:42px;height:40px;padding:8px;place-items:center;border:1px solid #ffffff5c;border-radius:3px;background:#0d1b2a38}
   .menu-button svg{width:22px;height:22px}
   .hero-image{height:125%!important;top:-15%!important;bottom:auto!important}
-  .language-menu summary{width:42px;height:40px;min-width:42px;padding:0;justify-content:center;gap:4px;border:1px solid #ffffff5c;border-radius:3px;background:#0d1b2a38}
-  .language-menu summary>svg{width:12px}
-  .language-menu summary .language-flag{width:24px;height:16px;flex-basis:24px}
+  .language-menu summary{width:42px;height:40px;min-width:42px;padding:0;justify-content:center;gap:0;border:1px solid #ffffff5c;border-radius:3px;background:#0d1b2a38}
+  .language-menu summary>svg{display:none}
+  .language-menu summary .language-flag{width:27px;height:18px;flex-basis:27px;border-radius:2px;box-shadow:none}
   .language-menu div{position:fixed;z-index:60;top:76px;inset-inline:12px;width:auto;max-height:calc(100dvh - 88px);padding:8px;background:#fff;border:0;border-radius:4px;box-shadow:0 20px 60px #06111e66;overflow-y:auto;overscroll-behavior:contain}
   .language-menu a{min-height:54px;padding:12px 14px;gap:14px;border-bottom:1px solid #eee9df;font-size:14px}
   .language-menu a:last-child{border-bottom:0}
