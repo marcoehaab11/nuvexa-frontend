@@ -7,7 +7,7 @@ export type PropertyDetailData = PropertyCardData & { description: string; prope
 export type ProjectCardData = { id: string; referenceNumber: string; name: string; slug: string; location: string; startingPrice: number | null; currency: string; coverImage: string | null; isFeatured: boolean; };
 export type ProjectDetailData = ProjectCardData & { description: string; deliveryDate: string | null; latitude: number | null; longitude: number | null; properties: PropertyCardData[]; };
 
-const apiBase = () => (process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+const apiBase = () => (process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "http://nuvexa.runasp.net").replace(/\/$/, "");
 async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${apiBase()}${path}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`NUVEXA API ${response.status}: ${path}`);

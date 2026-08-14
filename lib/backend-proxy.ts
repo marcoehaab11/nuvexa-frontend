@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 
-const apiBase = () => (process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+const apiBase = () => (process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "http://nuvexa.runasp.net").replace(/\/$/, "");
 
 export async function proxyBackend(request: NextRequest, path: string) {
   const headers = new Headers();
