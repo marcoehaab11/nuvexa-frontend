@@ -1,2 +1,35 @@
-import { Mail,MapPin,MessageCircle,Phone } from "lucide-react";import { Footer } from "@/components/footer";import { Header } from "@/components/header";import { isLocale,t } from "@/lib/data";import { notFound } from "next/navigation";
-export default async function Contact({params}:{params:Promise<{locale:string}>}){const{locale}=await params;if(!isLocale(locale))notFound();return <main dir={locale==="ar"?"rtl":"ltr"} className={locale==="ar"?"arabic inner-page":"inner-page"}><Header locale={locale} overlay={false}/><section className="contact-page section"><div><p className="section-label">NUVEXA PRIVATE OFFICE</p><h1>{t(locale,"Let’s start a\nconversation.","لنبدأ\nمحادثة.")}</h1><p>{t(locale,"Tell us what you are looking for. One of our property advisors will be in touch personally.","أخبرنا عما تبحث عنه، وسيتواصل معك أحد مستشارينا العقاريين بشكل شخصي.")}</p><ul><li><Phone/>+20 2 555 0140</li><li><MessageCircle/>+20 10 0000 0000</li><li><Mail/>hello@nuvexa.com</li><li><MapPin/>{t(locale,"New Cairo, Egypt","القاهرة الجديدة، مصر")}</li></ul></div><form><label>{t(locale,"Your name","الاسم")}<input required name="name"/></label><label>{t(locale,"Phone number","رقم الهاتف")}<input required name="phone" type="tel"/></label><label>{t(locale,"Email (optional)","البريد الإلكتروني (اختياري)")}<input name="email" type="email"/></label><label>{t(locale,"How can we help?","كيف يمكننا مساعدتك؟")}<textarea required name="message" rows={5}/></label><button type="submit">{t(locale,"Send enquiry","إرسال الاستفسار")}</button></form></section><Footer locale={locale}/></main>}
+import { Mail, MapPin, MessageCircle } from "lucide-react";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
+import { contactLocation, contactPhones } from "@/lib/contact";
+import { isLocale, t } from "@/lib/data";
+import { notFound } from "next/navigation";
+
+export default async function Contact({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
+
+  return <main dir={locale === "ar" ? "rtl" : "ltr"} className={locale === "ar" ? "arabic inner-page" : "inner-page"}>
+    <Header locale={locale} overlay={false}/>
+    <section className="contact-page section">
+      <div>
+        <p className="section-label">NUVEXA PRIVATE OFFICE</p>
+        <h1>{t(locale,"Let’s start a\nconversation.","لنبدأ\nمحادثة.")}</h1>
+        <p>{t(locale,"Tell us what you are looking for. One of our property advisors will be in touch personally.","أخبرنا عما تبحث عنه، وسيتواصل معك أحد مستشارينا العقاريين بشكل شخصي.")}</p>
+        <ul>
+          {contactPhones.map(phone => <li key={phone.whatsapp}><MessageCircle/><a href={phone.whatsapp} target="_blank" rel="noreferrer">{phone.display}</a></li>)}
+          <li><Mail/><a href="mailto:hello@nuvexa.com">hello@nuvexa.com</a></li>
+          <li><MapPin/>{contactLocation[locale]}</li>
+        </ul>
+      </div>
+      <form>
+        <label>{t(locale,"Your name","الاسم")}<input required name="name"/></label>
+        <label>{t(locale,"Phone number","رقم الهاتف")}<input required name="phone" type="tel"/></label>
+        <label>{t(locale,"Email (optional)","البريد الإلكتروني (اختياري)")}<input name="email" type="email"/></label>
+        <label>{t(locale,"How can we help?","كيف يمكننا مساعدتك؟")}<textarea required name="message" rows={5}/></label>
+        <button type="submit">{t(locale,"Send enquiry","إرسال الاستفسار")}</button>
+      </form>
+    </section>
+    <Footer locale={locale}/>
+  </main>;
+}
