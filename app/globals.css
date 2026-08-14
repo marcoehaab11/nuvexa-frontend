@@ -20,8 +20,9 @@
 .language-menu div{top:32px;width:175px;padding:10px}
 .language-menu a{display:flex;align-items:center;gap:12px;padding:10px}
 .language-menu a:hover,.language-menu a:focus-visible{background:#f4f0e8}
-.language-flag{font-family:"Segoe UI Emoji","Apple Color Emoji",sans-serif;font-size:18px;line-height:1;direction:ltr}
-.language-menu summary .language-flag{font-size:16px}
+.language-flag{display:inline-flex;width:24px;height:16px;flex:0 0 24px;border-radius:2px;overflow:hidden;box-shadow:0 0 0 1px #0d1b2a26;direction:ltr}
+.language-flag svg{display:block;width:100%;height:100%}
+.language-menu summary .language-flag{width:22px;height:15px;flex-basis:22px;box-shadow:0 0 0 1px #ffffff59}
 .language-menu summary{min-width:112px;justify-content:flex-end}.language-menu summary::-webkit-details-marker{display:none}.current-language{font-size:11px}.language-menu div{z-index:50;border:1px solid #e7e1d6;border-radius:2px}.language-menu a{min-height:42px}.language-menu a[aria-current="page"]{background:#f4f0e8;font-weight:700}.language-menu a span:nth-child(2){flex:1}.language-check{width:14px!important;color:var(--gold)}.home-empty{margin-top:35px;padding:35px;border:1px solid var(--line);color:#707778;text-align:center}@media(max-width:620px){.current-language{display:none}.language-menu summary{min-width:auto}.language-menu div{position:fixed;top:76px;inset-inline:16px;width:auto;max-height:calc(100vh - 95px);overflow:auto}}
 
 /* Database-backed admin forms and companies */

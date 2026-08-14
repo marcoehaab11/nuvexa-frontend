@@ -2,8 +2,9 @@
 import { Menu, X, ChevronDown, Check } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Locale, localeFlags, localeNames, t } from "@/lib/data";
+import { Locale, localeNames, t } from "@/lib/data";
 import { Logo } from "./logo";
+import { LanguageFlag } from "./language-flag";
 
 export function Header({ locale, overlay = true }: { locale: Locale; overlay?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -19,7 +20,7 @@ export function Header({ locale, overlay = true }: { locale: Locale; overlay?: b
     <Logo light={overlay} />
     <nav className="desktop-nav" aria-label="Main navigation">{links.map(([path,en,ar]) => <a key={path} href={`/${locale}/${path}`}>{t(locale,en,ar)}</a>)}</nav>
     <div className="header-actions">
-      <details className="language-menu"><summary aria-label={`Change language. Current language: ${localeNames[locale]}`}><span className="language-flag" aria-hidden="true">{localeFlags[locale]}</span><span className="current-language">{localeNames[locale]}</span><ChevronDown size={14}/></summary><div role="menu">{Object.entries(localeNames).map(([code,name]) => {const active=code===locale;return <a key={code} href={languageHref(code as Locale)} lang={code} hrefLang={code} aria-current={active?"page":undefined} role="menuitem"><span className="language-flag" aria-hidden="true">{localeFlags[code as Locale]}</span><span>{name}</span>{active&&<Check className="language-check" aria-hidden="true"/>}</a>})}</div></details>
+      <details className="language-menu"><summary aria-label={`Change language. Current language: ${localeNames[locale]}`}><span className="language-flag"><LanguageFlag locale={locale}/></span><span className="current-language">{localeNames[locale]}</span><ChevronDown size={14}/></summary><div role="menu">{Object.entries(localeNames).map(([code,name]) => {const active=code===locale;return <a key={code} href={languageHref(code as Locale)} lang={code} hrefLang={code} aria-current={active?"page":undefined} role="menuitem"><span className="language-flag"><LanguageFlag locale={code as Locale}/></span><span>{name}</span>{active&&<Check className="language-check" aria-hidden="true"/>}</a>})}</div></details>
       <a className="contact-link" href={`/${locale}/contact`}>{t(locale,"Talk to us","تحدث معنا")}</a>
       <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle menu">{open ? <X/> : <Menu/>}</button>
     </div>
