@@ -1,7 +1,7 @@
 "use client";
 import { Menu, X, ChevronDown, Check } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Locale, localeNames, t } from "@/lib/data";
 import { Logo } from "./logo";
 import { LanguageFlag } from "./language-flag";
@@ -9,6 +9,12 @@ import { LanguageFlag } from "./language-flag";
 export function Header({ locale, overlay = true }: { locale: Locale; overlay?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [open]);
   const languageHref = (code: Locale) => {
     const segments = pathname.split("/").filter(Boolean);
     if (segments.length && segments[0] in localeNames) segments[0] = code;
@@ -24,6 +30,6 @@ export function Header({ locale, overlay = true }: { locale: Locale; overlay?: b
       <a className="contact-link" href={`/${locale}/contact`}>{t(locale,"Talk to us","تحدث معنا")}</a>
       <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle menu">{open ? <X/> : <Menu/>}</button>
     </div>
-    {open && <div className="mobile-nav">{links.map(([path,en,ar]) => <a key={path} href={`/${locale}/${path}`} onClick={() => setOpen(false)}>{t(locale,en,ar)}</a>)}</div>}
+    {open && <nav className="mobile-nav" aria-label="Mobile navigation">{links.map(([path,en,ar]) => <a key={path} href={`/${locale}/${path}`} onClick={() => setOpen(false)}>{t(locale,en,ar)}</a>)}<a className="mobile-nav-contact" href={`/${locale}/contact`} onClick={() => setOpen(false)}>{t(locale,"Talk to us","تحدث معنا")}</a></nav>}
   </header>;
 }
