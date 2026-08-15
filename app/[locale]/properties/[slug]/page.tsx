@@ -41,7 +41,7 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
           </div>
         ) : (
           <div style={{ background: "#fef3c7", color: "#b45309", padding: "8px 16px", borderRadius: "20px", fontWeight: "700", fontSize: "14px", border: "1px solid #fde68a" }}>
-            {locale === "ar" ? "السعر عند الاتصال" : "Price on Request"}
+            {t(locale, "Price on Request", "السعر عند الاتصال")}
           </div>
         )}
         <CopyButton slug={p.slug} variant="icon" />
@@ -52,17 +52,17 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
         <h2>{p.title}</h2>
         <div className="rich-description-body prose" dangerouslySetInnerHTML={{ __html: p.description }} />
         <h3>{t(locale,"Features & amenities","المزايا والخدمات")}</h3>
-        <div className="amenities">{["Private pool","Landscaped garden","24/7 security","Covered parking"].map(x=><span key={x}><Check/> {x}</span>)}</div>
+        <div className="amenities">{["Private pool","Landscaped garden","24/7 security","Covered parking"].map(x=><span key={x}><Check/> {t(locale, x, x)}</span>)}</div>
       </div>
       <aside className="spec-panel">
         {Boolean(p.areaM2 && p.areaM2 > 0) && <div><Maximize2/><small>{t(locale,"AREA","المساحة")}</small><strong>{p.areaM2} m²</strong></div>}
         {Boolean(p.bedrooms && p.bedrooms > 0) && <div><BedDouble/><small>{t(locale,"BEDROOMS","غرف النوم")}</small><strong>{p.bedrooms}</strong></div>}
         {Boolean(p.bathrooms && p.bathrooms > 0) && <div><Bath/><small>{t(locale,"BATHROOMS","الحمامات")}</small><strong>{p.bathrooms}</strong></div>}
-        {Boolean(p.propertyType) && <div><Building/><small>{t(locale,"TYPE","النوع")}</small><strong>{p.propertyType}</strong></div>}
+        {Boolean(p.propertyType) && <div><Building/><small>{t(locale,"TYPE","النوع")}</small><strong>{t(locale, p.propertyType, p.propertyType)}</strong></div>}
         {p.isInstallmentAvailable && (
           <div className="installment-detail-card" style={{ gridColumn: "1 / -1", background: "#f8fafc", border: "1px solid #cbd5e1", padding: "20px", borderRadius: "4px", marginTop: "15px" }}>
             <h4 style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
-              💳 {locale === "ar" ? "نظام التقسيط والتسهيلات" : "Installment Payment Plan"}
+              💳 {t(locale, "Installment Payment Plan", "نظام التقسيط والتسهيلات")}
             </h4>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", fontSize: "13px" }}>
               {p.downPayment ? (
