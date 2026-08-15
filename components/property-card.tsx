@@ -2,6 +2,7 @@ import { BedDouble, Bath, Maximize2, ArrowUpLeft } from "lucide-react";
 import Image from "next/image";
 import type { PropertyCardData } from "@/lib/api";
 import { Locale, t } from "@/lib/data";
+import { CopyButton } from "@/components/copy-button";
 
 export function PropertyCard({ property, locale }: { property: PropertyCardData; locale: Locale }) {
   const price = new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-EG", { style: "currency", currency: property.currency, maximumFractionDigits: 0 }).format(property.price);
@@ -15,7 +16,13 @@ export function PropertyCard({ property, locale }: { property: PropertyCardData;
     </a>
     <div className="card-body">
       <p className="eyebrow">{property.company?.name || property.referenceNumber} · {property.location}</p>
-      <div className="card-title"><h3>{property.title}</h3><ArrowUpLeft size={20}/></div>
+      <div className="card-title">
+        <h3>{property.title}</h3>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <CopyButton slug={property.slug} variant="icon" />
+          <ArrowUpLeft size={20}/>
+        </div>
+      </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <p className="price">{price}</p>
         {property.installmentYears && (

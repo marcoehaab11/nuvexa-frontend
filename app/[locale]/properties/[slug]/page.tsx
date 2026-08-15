@@ -6,6 +6,7 @@ import { getProperties, getProperty } from "@/lib/api";
 import { isLocale, t } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { PropertyCard } from "@/components/property-card";
+import { CopyButton } from "@/components/copy-button";
 
 export default async function PropertyPage({params}:{params:Promise<{locale:string,slug:string}>}) {
   const {locale,slug}=await params;
@@ -22,16 +23,20 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
       </div>
       {gallery.length > 1 && <span className="gallery-count-badge">📸 {gallery.length} {t(locale,"Photos","صور")}</span>}
     </section>
+
     <section className="detail-head section">
       <div>
         <p className="section-label">{p.propertyType} · REF {p.referenceNumber}</p>
         <h1>{p.title}</h1>
         <p><MapPin/> {p.location}</p>
       </div>
-      <div className="detail-price">
-        <small>{t(locale,"ASKING PRICE","السعر المطلوب")}</small>
-        <strong>{new Intl.NumberFormat(locale==="ar"?"ar-EG":"en-EG",{style:"currency",currency:p.currency,maximumFractionDigits:0}).format(p.price)}</strong>
-        <span>{t(locale,"Available now","متاح الآن")}</span>
+      <div className="detail-price" style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "flex-end" }}>
+        <div>
+          <small>{t(locale,"ASKING PRICE","السعر المطلوب")}</small>
+          <strong>{new Intl.NumberFormat(locale==="ar"?"ar-EG":"en-EG",{style:"currency",currency:p.currency,maximumFractionDigits:0}).format(p.price)}</strong>
+          <span>{t(locale,"Available now","متاح الآن")}</span>
+        </div>
+        <CopyButton slug={p.slug} label="📋 نسخ رابط العقار للفيسبوك" />
       </div>
     </section>
     <section className="detail-content section">
