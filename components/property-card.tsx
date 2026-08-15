@@ -5,13 +5,18 @@ import { Locale, t } from "@/lib/data";
 import { CopyButton } from "@/components/copy-button";
 
 export function PropertyCard({ property, locale }: { property: PropertyCardData; locale: Locale }) {
-  const price = new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-EG", { style: "currency", currency: property.currency, maximumFractionDigits: 0 }).format(property.price);
+  const price = property.price > 0 
+    ? new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-EG", { style: "currency", currency: property.currency, maximumFractionDigits: 0 }).format(property.price)
+    : (locale === "ar" ? "السعر عند الاتصال" : "Price on request");
+
+  const hasSpecs = Boolean((property.areaM2 && property.areaM2 > 0) || (property.bedrooms && property.bedrooms > 0) || (property.bathrooms && property.bathrooms > 0));
+
   return <article className="property-card">
     <a className="card-image" href={`/${locale}/properties/${property.slug}`}>
       <Image src={property.coverImage || "/placeholder-property.svg"} alt={property.title} fill sizes="(max-width: 620px) 100vw, (max-width: 900px) 50vw, 33vw"/>
       <span>{t(locale, property.status, property.status === "ComingSoon" ? "قريباً" : "متاح")}</span>
       {property.isInstallmentAvailable && (
-        <span className="installment-card-badge">💳 {locale === "ar" ? "متاح تقسيط" : "Installments Available"}</span>
+        <span className="installment-card-badge">💳 {locale === "ar" ? "متاح تقسيط" : "Installments"}</span>
       )}
     </a>
     <div className="card-body">
@@ -31,11 +36,13 @@ export function PropertyCard({ property, locale }: { property: PropertyCardData;
           </small>
         )}
       </div>
-      <div className="card-specs">
-        <span><Maximize2/> {property.areaM2} m²</span>
-        <span><BedDouble/> {property.bedrooms ?? "—"}</span>
-        <span><Bath/> {property.bathrooms ?? "—"}</span>
-      </div>
+      {hasSpecs && (
+        <div className="card-specs">
+          {Boolean(property.areaM2 && property.areaM2 > 0) && <span><Maximize2/> {property.areaM2} m²</span>}
+          {Boolean(property.bedrooms && property.bedrooms > 0) && <span><BedDouble/> {property.bedrooms}</span>}
+          {Boolean(property.bathrooms && property.bathrooms > 0) && <span><Bath/> {property.bathrooms}</span>}
+        </div>
+      )}
     </div>
   </article>;
 }
