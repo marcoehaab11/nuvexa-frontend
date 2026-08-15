@@ -24,6 +24,10 @@ export default function Admin(){
     e.preventDefault();setError("");const d=new FormData(e.currentTarget);
     const imageUrls=d.getAll("imageUrls").map(x=>x.toString()).filter(Boolean);
     const coverImageUrl=d.get("coverImageUrl")?.toString()||imageUrls[0]||"";
+    const isInstallmentAvailable=d.get("isInstallmentAvailable")==="on";
+    const downPayment=d.get("downPayment")?Number(d.get("downPayment")):null;
+    const installmentYears=d.get("installmentYears")?Number(d.get("installmentYears")):null;
+    const monthlyInstallment=d.get("monthlyInstallment")?Number(d.get("monthlyInstallment")):null;
     try{
       await adminFetch("properties",{method:"POST",body:JSON.stringify({
         referenceNumber:d.get("referenceNumber"),
@@ -43,7 +47,11 @@ export default function Admin(){
         sourceLanguage:"en",
         title:d.get("title"),
         slug:d.get("slug"),
-        description:d.get("description")
+        description:d.get("description"),
+        isInstallmentAvailable:isInstallmentAvailable,
+        downPayment:downPayment,
+        installmentYears:installmentYears,
+        monthlyInstallment:monthlyInstallment
       })});
       setNotice("Property added and published successfully.");
       setShowForm(false);
@@ -68,6 +76,7 @@ function PropertyForm({lookups,onSubmit}:{lookups:Lookups;onSubmit:(e:FormEvent<
   const [description, setDescription] = useState<string>("");
   const [titleVal, setTitleVal] = useState<string>("");
   const [slugVal, setSlugVal] = useState<string>("");
+  const [enableInstallments, setEnableInstallments] = useState<boolean>(false);
 
   const countriesList = lookups.countries.length > 0 ? lookups.countries : [{ id: "11111111-1111-1111-1111-111111111111", name: "Egypt / مصر" }];
   const citiesList = lookups.cities.length > 0 ? lookups.cities : [{ id: "22222222-2222-2222-2222-222222222222", name: "Cairo / القاهرة" }];
@@ -98,7 +107,7 @@ function PropertyForm({lookups,onSubmit}:{lookups:Lookups;onSubmit:(e:FormEvent<
       <label>Type (نوع العقار)<select name="propertyType">{["Apartment","Villa","Duplex","Penthouse","Townhouse","Chalet","Office","Retail","Commercial","Land"].map(x=><option key={x}>{x}</option>)}</select></label>
       <label>Purpose (الغرض)<select name="listingPurpose"><option value="Sale">Sale (بيع)</option><option value="Rent">Rent (إيجار)</option></select></label>
       
-      <label>Price (السعر)<input name="price" type="number" min="0" defaultValue="0" placeholder="0"/></label>
+      <label>Price (السعر الإجمالي)<input name="price" type="number" min="0" defaultValue="0" placeholder="0"/></label>
       <label>Currency (العملة)<input name="currency" defaultValue="EGP" minLength={3} maxLength={3}/></label>
       <label>Area m² (المساحة م²)<input name="areaM2" type="number" min="0" defaultValue="0" placeholder="0"/></label>
 
@@ -109,6 +118,32 @@ function PropertyForm({lookups,onSubmit}:{lookups:Lookups;onSubmit:(e:FormEvent<
       <label>City (المدينة)<select name="cityId">{citiesList.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
       
       <label className="wide">Address / Detailed Location (العنوان المباشر)<input name="address" placeholder="مثال: الحي الخامس - ش الستين - بالقرب من المحور"/></label>
+
+      <div className="wide" style={{ background: "#f8fafc", padding: "16px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: "10px", fontSize: "14px", fontWeight: "700", color: "#0f172a", cursor: "pointer", width: "auto", margin: 0 }}>
+          <input 
+            type="checkbox" 
+            name="isInstallmentAvailable" 
+            checked={enableInstallments} 
+            onChange={(e) => setEnableInstallments(e.target.checked)} 
+            style={{ width: "18px", height: "18px", accentColor: "#c9a44a", cursor: "pointer", margin: 0 }}
+          />
+          <span>💳 متاح التقسيط وتسهيلات السداد (Enable Installment Option)</span>
+        </label>
+        {enableInstallments && (
+          <div className="form-grid" style={{ marginTop: "14px" }}>
+            <label>المقدم (Down Payment ج.م)
+              <input name="downPayment" type="number" min="0" placeholder="مثال: 100000" />
+            </label>
+            <label>سنوات التقسيط (Installment Years)
+              <input name="installmentYears" type="number" min="1" max="30" placeholder="مثال: 5 سنوات" />
+            </label>
+            <label className="wide">القسط الشهري (Monthly Installment ج.م)
+              <input name="monthlyInstallment" type="number" min="0" placeholder="مثال: 15000" />
+            </label>
+          </div>
+        )}
+      </div>
 
       <div className="wide">
         <ImageUploader images={images} onChange={setImages} coverImageUrl={coverImage} onCoverChange={setCoverImage}/>

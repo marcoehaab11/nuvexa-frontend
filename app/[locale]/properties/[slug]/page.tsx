@@ -46,6 +46,39 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
         <div><BedDouble/><small>{t(locale,"BEDROOMS","غرف النوم")}</small><strong>{p.bedrooms ?? "—"}</strong></div>
         <div><Bath/><small>{t(locale,"BATHROOMS","الحمامات")}</small><strong>{p.bathrooms ?? "—"}</strong></div>
         <div><Building/><small>{t(locale,"TYPE","النوع")}</small><strong>{p.propertyType}</strong></div>
+        {p.isInstallmentAvailable && (
+          <div className="installment-detail-card" style={{ gridColumn: "1 / -1", background: "#f8fafc", border: "1px solid #cbd5e1", padding: "20px", borderRadius: "4px", marginTop: "15px" }}>
+            <h4 style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+              💳 {locale === "ar" ? "نظام التقسيط والتسهيلات" : "Installment Payment Plan"}
+            </h4>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", fontSize: "13px" }}>
+              {p.downPayment ? (
+                <div>
+                  <small style={{ color: "#64748b", display: "block" }}>{t(locale,"DOWN PAYMENT","المقدم المطلوب")}</small>
+                  <strong style={{ color: "#0f172a", fontSize: "15px" }}>
+                    {new Intl.NumberFormat(locale==="ar"?"ar-EG":"en-EG",{style:"currency",currency:p.currency,maximumFractionDigits:0}).format(p.downPayment)}
+                  </strong>
+                </div>
+              ) : null}
+              {p.installmentYears ? (
+                <div>
+                  <small style={{ color: "#64748b", display: "block" }}>{t(locale,"INSTALLMENT YEARS","سنوات التقسيط")}</small>
+                  <strong style={{ color: "#0f172a", fontSize: "15px" }}>
+                    {p.installmentYears} {t(locale,"Years","سنوات")}
+                  </strong>
+                </div>
+              ) : null}
+              {p.monthlyInstallment ? (
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <small style={{ color: "#64748b", display: "block" }}>{t(locale,"MONTHLY INSTALLMENT","القسط الشهري")}</small>
+                  <strong style={{ color: "#059669", fontSize: "16px" }}>
+                    {new Intl.NumberFormat(locale==="ar"?"ar-EG":"en-EG",{style:"currency",currency:p.currency,maximumFractionDigits:0}).format(p.monthlyInstallment)} / {t(locale,"month","شهر")}
+                  </strong>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
       </aside>
     </section>
     <section className="map-placeholder">

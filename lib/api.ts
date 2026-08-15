@@ -2,8 +2,8 @@ import type { Locale } from "@/lib/data";
 
 export type CompanySummaryData = { id: string; name: string; slug: string; logoUrl: string | null; };
 export type CompanyData = CompanySummaryData & { legalName: string | null; website: string | null; email: string | null; phone: string | null; address: string | null; description: string | null; isActive: boolean; propertyCount: number; };
-export type PropertyCardData = { id: string; referenceNumber: string; title: string; slug: string; location: string; price: number; currency: string; areaM2: number; bedrooms: number | null; bathrooms: number | null; coverImage: string | null; isFeatured: boolean; status: string; company: CompanySummaryData | null; };
-export type PropertyDetailData = PropertyCardData & { description: string; propertyType: string; latitude: number | null; longitude: number | null; images: string[]; };
+export type PropertyCardData = { id: string; referenceNumber: string; title: string; slug: string; location: string; price: number; currency: string; areaM2: number; bedrooms: number | null; bathrooms: number | null; coverImage: string | null; isFeatured: boolean; status: string; company: CompanySummaryData | null; isInstallmentAvailable?: boolean; downPayment?: number | null; installmentYears?: number | null; monthlyInstallment?: number | null; };
+export type PropertyDetailData = PropertyCardData & { description: string; propertyType: string; latitude: number | null; longitude: number | null; images: string[]; isInstallmentAvailable?: boolean; downPayment?: number | null; installmentYears?: number | null; monthlyInstallment?: number | null; };
 export type ProjectCardData = { id: string; referenceNumber: string; name: string; slug: string; location: string; startingPrice: number | null; currency: string; coverImage: string | null; isFeatured: boolean; };
 export type ProjectDetailData = ProjectCardData & { description: string; deliveryDate: string | null; latitude: number | null; longitude: number | null; properties: PropertyCardData[]; };
 
