@@ -11,9 +11,12 @@ import { CopyButton } from "@/components/copy-button";
 export default async function PropertyPage({params}:{params:Promise<{locale:string,slug:string}>}) {
   const {locale,slug}=await params;
   if(!isLocale(locale)) notFound();
+  const decodedSlug = decodeURIComponent(slug);
   let p;
-  try { p=await getProperty(locale,slug); } catch { notFound(); }
-  const related=(await getProperties(locale)).filter(x=>x.slug!==slug).slice(0,3);
+  try { p=await getProperty(locale,decodedSlug); } catch {
+    try { p=await getProperty(locale,slug); } catch { notFound(); }
+  }
+  const related=(await getProperties(locale)).filter(x=>x.slug!==slug && x.slug!==decodedSlug).slice(0,3);
   const gallery=p.images.length?p.images:["/placeholder-property.svg"];
   return <main dir={locale==="ar"?"rtl":"ltr"} className={locale==="ar"?"arabic inner-page":"inner-page"}>
     <Header locale={locale} overlay={false}/>
@@ -33,7 +36,7 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
       <div className="detail-price" style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "flex-end" }}>
         <div>
           <small>{t(locale,"ASKING PRICE","السعر المطلوب")}</small>
-          <strong>{new Intl.NumberFormat(locale==="ar"?"ar-EG":"en-EG",{style:"currency",currency:p.currency,maximumFractionDigits:0}).format(p.price)}</strong>
+          <strong>{p.price > 0 ? new Intl.NumberFormat(locale==="ar"?"ar-EG":"en-EG",{style:"currency",currency:p.currency,maximumFractionDigits:0}).format(p.price) : (locale === "ar" ? "السعر عند الاتصال" : "Price on request")}</strong>
           <span>{t(locale,"Available now","متاح الآن")}</span>
         </div>
         <CopyButton slug={p.slug} label="📋 نسخ رابط العقار للفيسبوك" />
@@ -47,10 +50,10 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
         <div className="amenities">{["Private pool","Landscaped garden","24/7 security","Covered parking"].map(x=><span key={x}><Check/> {x}</span>)}</div>
       </div>
       <aside className="spec-panel">
-        <div><Maximize2/><small>{t(locale,"AREA","المساحة")}</small><strong>{p.areaM2} m²</strong></div>
-        <div><BedDouble/><small>{t(locale,"BEDROOMS","غرف النوم")}</small><strong>{p.bedrooms ?? "—"}</strong></div>
-        <div><Bath/><small>{t(locale,"BATHROOMS","الحمامات")}</small><strong>{p.bathrooms ?? "—"}</strong></div>
-        <div><Building/><small>{t(locale,"TYPE","النوع")}</small><strong>{p.propertyType}</strong></div>
+        {Boolean(p.areaM2 && p.areaM2 > 0) && <div><Maximize2/><small>{t(locale,"AREA","المساحة")}</small><strong>{p.areaM2} m²</strong></div>}
+        {Boolean(p.bedrooms && p.bedrooms > 0) && <div><BedDouble/><small>{t(locale,"BEDROOMS","غرف النوم")}</small><strong>{p.bedrooms}</strong></div>}
+        {Boolean(p.bathrooms && p.bathrooms > 0) && <div><Bath/><small>{t(locale,"BATHROOMS","الحمامات")}</small><strong>{p.bathrooms}</strong></div>}
+        {Boolean(p.propertyType) && <div><Building/><small>{t(locale,"TYPE","النوع")}</small><strong>{p.propertyType}</strong></div>}
         {p.isInstallmentAvailable && (
           <div className="installment-detail-card" style={{ gridColumn: "1 / -1", background: "#f8fafc", border: "1px solid #cbd5e1", padding: "20px", borderRadius: "4px", marginTop: "15px" }}>
             <h4 style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>

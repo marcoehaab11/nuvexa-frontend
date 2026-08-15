@@ -86,8 +86,10 @@ export default function Admin(){
       imageUrls:imageUrls,
       sourceLanguage:"en",
       title:title,
+      titleEn:d.get("titleEn")?.toString().trim()||null,
       slug:d.get("slug")||null,
       description:d.get("description")||null,
+      descriptionEn:d.get("descriptionEn")?.toString().trim()||null,
       isInstallmentAvailable:isInstallmentAvailable,
       downPayment:downPayment,
       installmentYears:installmentYears,
@@ -208,9 +210,12 @@ function PropertyForm({lookups,onSubmit,submitting,initialData}:{lookups:Lookups
   const [images, setImages] = useState<string[]>(initialData?.images || (initialData?.coverImage ? [initialData.coverImage] : []));
   const [coverImage, setCoverImage] = useState<string>(initialData?.coverImage || "");
   const [description, setDescription] = useState<string>(initialData?.description || "");
+  const [descriptionEn, setDescriptionEn] = useState<string>("");
   const [titleVal, setTitleVal] = useState<string>(initialData?.title || "");
+  const [titleEnVal, setTitleEnVal] = useState<string>("");
   const [slugVal, setSlugVal] = useState<string>(initialData?.slug || "");
   const [enableInstallments, setEnableInstallments] = useState<boolean>(initialData?.isInstallmentAvailable || Boolean(initialData?.downPayment || initialData?.installmentYears || initialData?.monthlyInstallment));
+  const [activeLangTab, setActiveLangTab] = useState<"ar" | "en">("ar");
 
   useEffect(() => {
     if (initialData) {
@@ -236,16 +241,63 @@ function PropertyForm({lookups,onSubmit,submitting,initialData}:{lookups:Lookups
 
   return <form className="admin-form" onSubmit={onSubmit}>
     <h2>{initialData ? "Edit Property (تعديل بيانات العقار)" : "Add new property (إضافة عقار جديد)"}</h2>
+    
+    <div style={{ display: "flex", gap: "8px", marginBottom: "20px", borderBottom: "2px solid #e2e8f0", paddingBottom: "8px" }}>
+      <button 
+        type="button" 
+        onClick={() => setActiveLangTab("ar")}
+        style={{ 
+          padding: "8px 16px", 
+          borderRadius: "4px", 
+          fontWeight: 700, 
+          fontSize: "13px",
+          cursor: "pointer",
+          border: activeLangTab === "ar" ? "1px solid #c9a44a" : "1px solid #cbd5e1",
+          background: activeLangTab === "ar" ? "#c9a44a" : "#f8fafc",
+          color: activeLangTab === "ar" ? "#ffffff" : "#475569"
+        }}
+      >
+        🇸🇦 العربية (Arabic Details)
+      </button>
+      <button 
+        type="button" 
+        onClick={() => setActiveLangTab("en")}
+        style={{ 
+          padding: "8px 16px", 
+          borderRadius: "4px", 
+          fontWeight: 700, 
+          fontSize: "13px",
+          cursor: "pointer",
+          border: activeLangTab === "en" ? "1px solid #c9a44a" : "1px solid #cbd5e1",
+          background: activeLangTab === "en" ? "#c9a44a" : "#f8fafc",
+          color: activeLangTab === "en" ? "#ffffff" : "#475569"
+        }}
+      >
+        🇬🇧 English (English Details)
+      </button>
+    </div>
+
     <div className="form-grid">
-      <label className="wide">Title (اسم العقار)<span style={{ color: "#ef4444", marginInlineStart: 4 }}>* (إجباري)</span>
-        <input 
-          name="title" 
-          value={titleVal} 
-          onChange={(e) => handleTitleChange(e.target.value)} 
-          required 
-          placeholder="مثال: شقة للبيع في التجمع الخامس بكومبوند مميز"
-        />
-      </label>
+      {activeLangTab === "ar" ? (
+        <label className="wide">Title in Arabic (اسم العقار بالعربي)<span style={{ color: "#ef4444", marginInlineStart: 4 }}>* (إجباري)</span>
+          <input 
+            name="title" 
+            value={titleVal} 
+            onChange={(e) => handleTitleChange(e.target.value)} 
+            required 
+            placeholder="مثال: شقة فاخرة للبيع في السهل الحشيش"
+          />
+        </label>
+      ) : (
+        <label className="wide">Title in English (اسم العقار بالإنجليزي)
+          <input 
+            name="titleEn" 
+            value={titleEnVal} 
+            onChange={(e) => setTitleEnVal(e.target.value)} 
+            placeholder="Example: Luxury Apartment for sale in Sahl Hasheesh"
+          />
+        </label>
+      )}
 
       <label>Reference Code (الكود المرجعي)<input name="referenceNumber" defaultValue={initialData?.referenceNumber || `REF-${Math.floor(1000 + Math.random() * 9000)}`}/></label>
       <label>Slug (الرابط)<input name="slug" value={slugVal} onChange={(e) => setSlugVal(e.target.value)} placeholder="شقة-للبيع-التجمع"/></label>
@@ -306,7 +358,17 @@ function PropertyForm({lookups,onSubmit,submitting,initialData}:{lookups:Lookups
       </div>
 
       <div className="wide">
+        <p style={{ fontSize: "13px", fontWeight: 700, marginBottom: "8px", color: "#0f172a" }}>
+          🇸🇦 الوصف والتفاصيل بالعربية (Arabic Description)
+        </p>
         <RichEditor value={description} onChange={setDescription} required={false}/>
+      </div>
+
+      <div className="wide" style={{ marginTop: "16px" }}>
+        <p style={{ fontSize: "13px", fontWeight: 700, marginBottom: "8px", color: "#0f172a" }}>
+          🇬🇧 الوصف والتفاصيل بالإنجليزي (English Description - Optional)
+        </p>
+        <RichEditor value={descriptionEn} onChange={setDescriptionEn} required={false}/>
       </div>
     </div>
     <button 
