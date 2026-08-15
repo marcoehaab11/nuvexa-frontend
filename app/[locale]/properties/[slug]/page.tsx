@@ -32,7 +32,7 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
         <h1>{p.title}</h1>
         <p><MapPin/> {p.location}</p>
       </div>
-      <div className="detail-price" style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "flex-end" }}>
+      <div className="detail-price" style={{ display: "flex", flexDirection: "row", gap: "12px", alignItems: "center" }}>
         {p.price > 0 ? (
           <div>
             <small>{t(locale,"ASKING PRICE","السعر المطلوب")}</small>
