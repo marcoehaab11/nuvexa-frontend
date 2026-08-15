@@ -36,6 +36,13 @@ export function PropertyInquirySection({
       return;
     }
 
+    const phoneDigitsOnly = phone.replace(/[^0-9]/g, "");
+    if (phoneDigitsOnly.length < 7 || !/^\+?[0-9\s\-()]{7,20}$/.test(phone)) {
+      setError(isRtl ? "يرجى كتابة رقم هاتف صحيح يحتوي على أرقام فقط (مثال: 01005030131 أو +201221042717)." : "Please enter a valid phone number with digits only.");
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/public/contact", {
         method: "POST",
@@ -135,10 +142,18 @@ export function PropertyInquirySection({
                 <input
                   name="phone"
                   type="tel"
+                  inputMode="tel"
                   required
                   dir="ltr"
                   placeholder="+20 100 000 0000"
                   style={{ direction: "ltr", unicodeBidi: "isolate" }}
+                  onKeyDown={(e) => {
+                    const allowedKeys = ["Backspace", "Delete", "Tab", "Escape", "Enter", "ArrowLeft", "ArrowRight", "Home", "End", "+", "-", " "];
+                    if (allowedKeys.includes(e.key) || e.ctrlKey || e.metaKey) return;
+                    if (!/^[0-9]$/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </label>
 

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { FormEvent,useCallback,useEffect,useMemo,useState } from "react";
-import { Building2,ChevronDown,Globe2,Home,Languages,LayoutDashboard,LockKeyhole,MapPin,Menu,Plus,Search,Settings,Users,Loader2,Pencil,Trash2 } from "lucide-react";
+import { Building2,ChevronDown,Globe2,Home,Languages,LayoutDashboard,LockKeyhole,MapPin,Menu,Plus,Search,Settings,Users,Loader2,Pencil,Trash2,MessageSquare,Phone } from "lucide-react";
 import type { CompanyData,CompanySummaryData,PropertyCardData,PropertyDetailData } from "@/lib/api";
 import { CopyButton } from "@/components/copy-button";
 
@@ -10,7 +10,19 @@ import { ImageUploader } from "@/components/image-uploader";
 
 type Option={id:string;name:string;parentId?:string|null};
 type Lookups={countries:Option[];cities:Option[];companies:CompanySummaryData[]};
-const nav=[[LayoutDashboard,"Dashboard"],[Home,"Properties"],[Building2,"Companies"],[MapPin,"Locations"],[Languages,"Languages"],[Users,"Users"],[Settings,"Site settings"]] as const;
+type InquiryData = {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string | null;
+  message: string;
+  propertyId?: string | null;
+  propertyTitle?: string | null;
+  referenceNumber?: string | null;
+  createdAt: string;
+};
+
+const nav=[[LayoutDashboard,"Dashboard"],[MessageSquare,"Inquiries"],[Home,"Properties"],[Building2,"Companies"],[MapPin,"Locations"],[Languages,"Languages"],[Users,"Users"],[Settings,"Site settings"]] as const;
 
 async function adminFetch<T>(path:string,init?:RequestInit):Promise<T>{
   const response=await fetch(`/api/backend/admin/${path}`,{credentials:"include",...init,headers:{"Content-Type":"application/json",...(init?.headers||{})}});
@@ -28,12 +40,12 @@ async function adminFetch<T>(path:string,init?:RequestInit):Promise<T>{
 
 export default function Admin(){
   const[active,setActive]=useState("Dashboard");const[auth,setAuth]=useState<"loading"|"in"|"out">("loading");const[error,setError]=useState("");
-  const[properties,setProperties]=useState<PropertyCardData[]>([]);const[companies,setCompanies]=useState<CompanyData[]>([]);const[lookups,setLookups]=useState<Lookups>({countries:[],cities:[],companies:[]});
+  const[properties,setProperties]=useState<PropertyCardData[]>([]);const[companies,setCompanies]=useState<CompanyData[]>([]);const[lookups,setLookups]=useState<Lookups>({countries:[],cities:[],companies:[]});const[inquiries,setInquiries]=useState<InquiryData[]>([]);
   const[showForm,setShowForm]=useState(false);const[search,setSearch]=useState("");const[notice,setNotice]=useState("");
   const[submitting,setSubmitting]=useState(false);
   const[editingProperty,setEditingProperty]=useState<PropertyDetailData|null>(null);
 
-  const load=useCallback(async()=>{const[p,c,l]=await Promise.all([adminFetch<PropertyCardData[]>("properties?locale=en"),adminFetch<CompanyData[]>("companies"),adminFetch<Lookups>("lookups?locale=en")]);setProperties(p);setCompanies(c);setLookups(l);},[]);
+  const load=useCallback(async()=>{const[p,c,l,inq]=await Promise.all([adminFetch<PropertyCardData[]>("properties?locale=en"),adminFetch<CompanyData[]>("companies"),adminFetch<Lookups>("lookups?locale=en"),adminFetch<InquiryData[]>("inquiries").catch(()=>[])]);setProperties(p);setCompanies(c);setLookups(l);setInquiries(inq||[]);},[]);
   useEffect(()=>{fetch("/api/admin/auth/me",{credentials:"include"}).then(async r=>{if(!r.ok){setAuth("out");return;}setAuth("in");await load().catch(e=>setError(e.message));}).catch(()=>setAuth("out"));},[load]);
   
   async function login(e:FormEvent<HTMLFormElement>){e.preventDefault();setError("");const data=new FormData(e.currentTarget);const response=await fetch("/api/admin/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({email:data.get("email"),password:data.get("password")})});if(response.ok){setAuth("in");await load();}else setError("Unable to sign in. Check your credentials and API configuration.");}
@@ -157,10 +169,116 @@ export default function Admin(){
   const available=properties.filter(p=>p.status==="Available").length;
 
   return <main className="admin-shell" dir="ltr"><aside className="admin-sidebar"><Link className="admin-brand" href="/en"><strong>NUVEXA</strong><small>ADMINISTRATION</small></Link><nav>{nav.map(([Icon,label])=><button key={label} className={active===label?"active":""} onClick={()=>{setActive(label);setShowForm(false);setEditingProperty(null);setError("");}}><Icon/>{label}</button>)}</nav><div className="admin-user"><span>ME</span><div><strong>Administrator</strong><small>Authorized user</small></div><ChevronDown/></div></aside><section className="admin-main"><header><button className="admin-menu"><Menu/></button><div><Search/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={`Search ${active.toLowerCase()}...`}/></div><Link href="/en" target="_blank"><Globe2/> View website</Link></header><div className="admin-content"><div className="admin-title"><div><p>NUVEXA CRM</p><h1>{active}</h1></div>{["Properties","Companies"].includes(active)&&<button onClick={()=>{ setEditingProperty(null); setShowForm(!showForm); }}><Plus/> Add {active==="Properties"?"property":"company"}</button>}</div>{notice&&<p className="admin-notice">{notice}</p>}{error&&<p className="admin-error">{error}</p>}
-  {active==="Dashboard"&&<><div className="stat-grid">{[["Total properties",properties.length,"Database inventory"],["Available",available,"Ready for sale"],["Companies",companies.length,"Active partners"]].map(x=><article key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong><small>{x[2]}</small></article>)}</div><PropertyTable properties={properties} onEdit={startEditProperty} onDelete={deleteProperty} onStatusChange={changeStatus}/></>}
+  {active==="Dashboard"&&<><div className="stat-grid">{[["Total properties",properties.length,"Database inventory"],["Available",available,"Ready for sale"],["Inquiries / Leads",inquiries.length,"Customer requests"],["Companies",companies.length,"Active partners"]].map(x=><article key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong><small>{x[2]}</small></article>)}</div><PropertyTable properties={properties} onEdit={startEditProperty} onDelete={deleteProperty} onStatusChange={changeStatus}/></>}
+  {active==="Inquiries"&&<InquiriesTable inquiries={inquiries}/>}
   {active==="Properties"&&<>{showForm&&<PropertyForm lookups={lookups} onSubmit={saveProperty} submitting={submitting} initialData={editingProperty}/>}<PropertyTable properties={properties} onEdit={startEditProperty} onDelete={deleteProperty} onStatusChange={changeStatus}/></>}
   {active==="Companies"&&<>{showForm&&<CompanyForm onSubmit={createCompany} submitting={submitting}/>}<section className="company-grid">{filteredCompanies.map(c=><article key={c.id}>{c.logoUrl?<img src={c.logoUrl} alt={`${c.name} logo`}/>:<div className="company-logo">{c.name.slice(0,2).toUpperCase()}</div>}<h2>{c.name}</h2><p>{c.description||c.legalName||"No description"}</p><dl><div><dt>Properties</dt><dd>{c.propertyCount}</dd></div><div><dt>Phone</dt><dd>{c.phone||"—"}</dd></div><div><dt>Email</dt><dd>{c.email||"—"}</dd></div></dl>{c.website&&<a href={c.website} target="_blank" rel="noreferrer">Open website</a>}</article>)}</section></>}
-  {!['Dashboard','Properties','Companies'].includes(active)&&<div className="module-placeholder"><div><Home/><h2>{active} workspace</h2><p>This module uses protected ASP.NET Core admin endpoints.</p></div></div>}</div></section></main>;
+  {!['Dashboard','Inquiries','Properties','Companies'].includes(active)&&<div className="module-placeholder"><div><Home/><h2>{active} workspace</h2><p>This module uses protected ASP.NET Core admin endpoints.</p></div></div>}</div></section></main>;
+}
+
+function InquiriesTable({ inquiries }: { inquiries: InquiryData[] }) {
+  return (
+    <div className="admin-panels single">
+      <section>
+        <div className="panel-title">
+          <h2>Inquiries & Customer Leads ({inquiries.length})</h2>
+          <span>استفسارات وطلبات المعاينة من عملاء الموقع</span>
+        </div>
+        {inquiries.length === 0 ? (
+          <p style={{ padding: "24px", color: "#64748b", fontWeight: 600 }}>لم يتم استلام أي استفسارات أو طلبات تواصل من العملاء بعد.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>CUSTOMER NAME</th>
+                <th>PHONE / CONTACT</th>
+                <th>PROPERTY INQUIRED</th>
+                <th>MESSAGE</th>
+                <th>DATE</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inquiries.map((inq) => {
+                const cleanPhone = inq.phone.replace(/[^0-9+]/g, "");
+                const waUrl = `https://wa.me/${cleanPhone.replace("+", "")}`;
+                return (
+                  <tr key={inq.id}>
+                    <td>
+                      <strong>{inq.name}</strong>
+                    </td>
+                    <td>
+                      <span dir="ltr" style={{ fontWeight: 700, unicodeBidi: "isolate", direction: "ltr", color: "#0f172a" }}>
+                        {inq.phone}
+                      </span>
+                    </td>
+                    <td>
+                      {inq.propertyTitle ? (
+                        <div>
+                          <strong style={{ color: "#0f172a", fontSize: "13px" }}>{inq.propertyTitle}</strong>
+                          {inq.referenceNumber && <small style={{ display: "block", color: "#64748b" }}>{inq.referenceNumber}</small>}
+                        </div>
+                      ) : (
+                        <span style={{ color: "#94a3b8" }}>General Inquiry</span>
+                      )}
+                    </td>
+                    <td style={{ maxWidth: "280px", fontSize: "13px", color: "#334155" }}>
+                      {inq.message}
+                    </td>
+                    <td>
+                      <small style={{ color: "#64748b", fontSize: "12px" }}>
+                        {new Date(inq.createdAt).toLocaleString("ar-EG", { dateStyle: "short", timeStyle: "short" })}
+                      </small>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <a
+                          href={`tel:${cleanPhone}`}
+                          style={{
+                            background: "#0f172a",
+                            color: "#fff",
+                            padding: "6px 10px",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            textDecoration: "none"
+                          }}
+                        >
+                          <Phone size={12} /> Call
+                        </a>
+                        <a
+                          href={waUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            background: "#25d366",
+                            color: "#fff",
+                            padding: "6px 10px",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            textDecoration: "none"
+                          }}
+                        >
+                          <MessageSquare size={12} /> WhatsApp
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </section>
+    </div>
+  );
 }
 
 function PropertyTable({properties, onEdit, onDelete, onStatusChange}:{properties:PropertyCardData[]; onEdit:(p:PropertyCardData)=>void; onDelete:(id:string)=>void; onStatusChange:(id:string, status:string)=>void}){
