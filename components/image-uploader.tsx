@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Trash2, Star, ArrowLeft, ArrowRight, Image as ImageIcon, Upload, Sparkles } from "lucide-react";
+import { Plus, Trash2, Star, ArrowLeft, ArrowRight, ImageIcon, Upload, Sparkles } from "lucide-react";
 
 export interface ImageUploaderProps {
   images: string[];
@@ -15,7 +15,6 @@ const SAMPLE_IMAGES = [
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1600573472591-ee6c563aaec9?q=80&w=1200&auto=format&fit=crop",
 ];
 
 export function ImageUploader({ images, onChange, coverImageUrl, onCoverChange }: ImageUploaderProps) {
@@ -100,14 +99,14 @@ export function ImageUploader({ images, onChange, coverImageUrl, onCoverChange }
   const currentCover = coverImageUrl || images[0] || "";
 
   return (
-    <div className="image-uploader-wrapper">
+    <div className="image-uploader-wrapper" dir="rtl">
       <div className="image-uploader-header">
         <div>
           <h3>معرض صور العقار ({images.length} صور مضافة)</h3>
           <p>أضف عدة صور عالية الجودة للعقار، واختر الصورة الرئيسية ليتم عرضها كغلاف.</p>
         </div>
         <button type="button" className="sample-images-btn" onClick={addSampleImages}>
-          <Sparkles size={14} /> إضافة صور تجريبية مجهزة
+          <Sparkles style={{ width: 14, height: 14 }} /> إضافة صور تجريبية مجهزة
         </button>
       </div>
 
@@ -126,13 +125,13 @@ export function ImageUploader({ images, onChange, coverImageUrl, onCoverChange }
             }}
           />
           <button type="button" onClick={() => addImageUrl()}>
-            <Plus size={16} /> إضافة رابط صورة
+            <Plus style={{ width: 14, height: 14 }} /> إضافة رابط صورة
           </button>
         </div>
 
         <div className="file-upload-button">
           <label>
-            <Upload size={16} /> رفع صور من الجهاز
+            <Upload style={{ width: 14, height: 14 }} /> رفع صور من الجهاز
             <input type="file" accept="image/*" multiple onChange={handleFileUpload} style={{ display: "none" }} />
           </label>
         </div>
@@ -140,7 +139,9 @@ export function ImageUploader({ images, onChange, coverImageUrl, onCoverChange }
 
       {images.length === 0 ? (
         <div className="image-uploader-empty">
-          <ImageIcon size={32} />
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
+            <ImageIcon style={{ width: 32, height: 32, color: "#94a3b8" }} />
+          </div>
           <p>لم يتم إضافة أي صور بعد. أضف روابط الصور أو ارفع من جهازك مباشرة.</p>
         </div>
       ) : (
@@ -161,7 +162,7 @@ export function ImageUploader({ images, onChange, coverImageUrl, onCoverChange }
                       onClick={() => setAsCover(img)}
                       title="تعيين كصورة غلاف أساسية"
                     >
-                      <Star size={13} /> غلاف
+                      <Star style={{ width: 12, height: 12 }} /> غلاف
                     </button>
                   )}
                   <div className="move-btns">
@@ -171,7 +172,7 @@ export function ImageUploader({ images, onChange, coverImageUrl, onCoverChange }
                       onClick={() => moveImage(index, "left")}
                       title="تحريك للخلف"
                     >
-                      <ArrowRight size={13} />
+                      <ArrowRight style={{ width: 12, height: 12 }} />
                     </button>
                     <button
                       type="button"
@@ -179,7 +180,7 @@ export function ImageUploader({ images, onChange, coverImageUrl, onCoverChange }
                       onClick={() => moveImage(index, "right")}
                       title="تحريك للأمام"
                     >
-                      <ArrowLeft size={13} />
+                      <ArrowLeft style={{ width: 12, height: 12 }} />
                     </button>
                   </div>
                   <button
@@ -188,7 +189,7 @@ export function ImageUploader({ images, onChange, coverImageUrl, onCoverChange }
                     onClick={() => removeImage(index)}
                     title="حذف الصورة"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 style={{ width: 12, height: 12 }} />
                   </button>
                 </div>
               </div>

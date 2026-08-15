@@ -3,8 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { 
   Bold, Italic, Underline, Heading1, Heading2, List, ListOrdered, 
-  Smile, Image as ImageIcon, Link as LinkIcon, Eye, Code, AlignLeft, 
-  AlignCenter, AlignRight, Check, Sparkles, HelpCircle
+  ImageIcon, Eye, Code, AlignLeft, Sparkles
 } from "lucide-react";
 
 export interface RichEditorProps {
@@ -15,25 +14,25 @@ export interface RichEditorProps {
 }
 
 const PRESET_LOGOS = [
-  { id: "pool", emoji: "🏊", label: "حمام سباحة", labelEn: "Private Pool", color: "#0284c7" },
-  { id: "parking", emoji: "🚗", label: "جراج خاص", labelEn: "Covered Parking", color: "#475569" },
-  { id: "security", emoji: "🛡️", label: "أمن وحراسة 24/7", labelEn: "24/7 Security", color: "#166534" },
-  { id: "garden", emoji: "🌳", label: "حديقة خاصة", labelEn: "Private Garden", color: "#15803d" },
-  { id: "gym", emoji: "🏋️", label: "جيم وسبا", labelEn: "Gym & Spa", color: "#b45309" },
-  { id: "smart", emoji: "⚡", label: "سمارت هوم", labelEn: "Smart Home System", color: "#d97706" },
-  { id: "view_sea", emoji: "🌊", label: "إطلالة مباشرة على البحر", labelEn: "Direct Sea View", color: "#0369a1" },
-  { id: "view_city", emoji: "🏙️", label: "إطلالة بانورامية", labelEn: "Panoramic View", color: "#334155" },
-  { id: "ac", emoji: "❄️", label: "تكييف مركزي", labelEn: "Central AC", color: "#0891b2" },
-  { id: "ready", emoji: "🔑", label: "تسليم فوري", labelEn: "Ready to Move", color: "#9333ea" },
-  { id: "installments", emoji: "💳", label: "تسهيلات وسداد بالتقسيط", labelEn: "Flexible Payment Plan", color: "#059669" },
-  { id: "title_deed", emoji: "📜", label: "عقد أخضر حصة في الأرض", labelEn: "Registered Green Title", color: "#15803d" },
-  { id: "whatsapp", emoji: "💬", label: "تواصل واتساب مباشر", labelEn: "Direct WhatsApp", color: "#16a34a" },
-  { id: "phone", emoji: "📞", label: "اتصل بنا فوراً", labelEn: "Direct Owner Contact", color: "#2563eb" },
-  { id: "villa", emoji: "🌟", label: "فيلا مستقلة فاخرة", labelEn: "Luxury Standalone Villa", color: "#c9a44a" },
-  { id: "building", emoji: "🏢", label: "موقع استراتيجي مميز", labelEn: "Prime Location Tower", color: "#475569" },
+  { id: "pool", emoji: "🏊", label: "حمام سباحة", color: "#0284c7" },
+  { id: "parking", emoji: "🚗", label: "جراج خاص", color: "#475569" },
+  { id: "security", emoji: "🛡️", label: "أمن 24/7", color: "#166534" },
+  { id: "garden", emoji: "🌳", label: "حديقة خاصة", color: "#15803d" },
+  { id: "gym", emoji: "🏋️", label: "جيم وسبا", color: "#b45309" },
+  { id: "smart", emoji: "⚡", label: "سمارت هوم", color: "#d97706" },
+  { id: "view_sea", emoji: "🌊", label: "إطلالة بحر", color: "#0369a1" },
+  { id: "view_city", emoji: "🏙️", label: "إطلالة بانورامية", color: "#334155" },
+  { id: "ac", emoji: "❄️", label: "تكييف مركزي", color: "#0891b2" },
+  { id: "ready", emoji: "🔑", label: "تسليم فوري", color: "#9333ea" },
+  { id: "installments", emoji: "💳", label: "تقسيط وتسهيلات", color: "#059669" },
+  { id: "title_deed", emoji: "📜", label: "عقد أخضر", color: "#15803d" },
+  { id: "whatsapp", emoji: "💬", label: "واتساب مباشر", color: "#16a34a" },
+  { id: "phone", emoji: "📞", label: "اتصال مباشر", color: "#2563eb" },
+  { id: "villa", emoji: "🌟", label: "فيلا فاخرة", color: "#c9a44a" },
+  { id: "building", emoji: "🏢", label: "برج سكني", color: "#475569" },
 ];
 
-export function RichEditor({ value, onChange, label = "الوصف التفصيلي للمقر / العقار", required = false }: RichEditorProps) {
+export function RichEditor({ value, onChange, label = "وصف العقار والخدمات واللوجوهات", required = false }: RichEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "html">("edit");
   const [htmlContent, setHtmlContent] = useState(value || "");
@@ -57,8 +56,8 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
     }
   };
 
-  const execCmd = (command: string, value: string = "") => {
-    document.execCommand(command, false, value);
+  const execCmd = (command: string, val: string = "") => {
+    document.execCommand(command, false, val);
     updateContent();
   };
 
@@ -92,7 +91,7 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
   };
 
   const insertPresetLogo = (preset: typeof PRESET_LOGOS[0]) => {
-    const badgeHtml = `<span class="logo-badge" style="display: inline-flex; align-items: center; gap: 6px; background-color: #f1f5f9; color: ${preset.color}; border: 1px solid ${preset.color}33; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; margin: 3px 4px; vertical-align: middle; unicode-bidi: embed;">
+    const badgeHtml = `<span class="logo-badge" style="display: inline-flex; align-items: center; gap: 5px; background-color: #f1f5f9; color: ${preset.color}; border: 1px solid ${preset.color}33; padding: 3px 10px; border-radius: 16px; font-size: 13px; font-weight: 600; margin: 3px 4px; vertical-align: middle; unicode-bidi: embed;">
       <span style="font-size: 15px;">${preset.emoji}</span>
       <span>${preset.label}</span>
     </span>&nbsp;`;
@@ -102,8 +101,8 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
 
   const handleAddCustomLogo = () => {
     if (!customLogoUrl) return;
-    const logoHtml = `<span class="custom-logo-badge" style="display: inline-flex; align-items: center; gap: 6px; background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; margin: 3px 4px; vertical-align: middle;">
-      <img src="${customLogoUrl}" alt="${customLogoLabel}" style="width: 18px; height: 18px; object-fit: contain; display: inline-block;" />
+    const logoHtml = `<span class="custom-logo-badge" style="display: inline-flex; align-items: center; gap: 6px; background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 16px; font-size: 13px; font-weight: 600; margin: 3px 4px; vertical-align: middle;">
+      <img src="${customLogoUrl}" alt="${customLogoLabel}" style="width: 16px; height: 16px; object-fit: contain; display: inline-block;" />
       ${customLogoLabel ? `<span>${customLogoLabel}</span>` : ""}
     </span>&nbsp;`;
     insertHtmlAtCursor(logoHtml);
@@ -113,7 +112,7 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
   };
 
   return (
-    <div className="rich-editor-wrapper">
+    <div className="rich-editor-wrapper" dir="rtl">
       <div className="rich-editor-header">
         <label className="rich-editor-label">
           {label} {required && <span style={{ color: "#ef4444" }}>*</span>}
@@ -124,21 +123,21 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
             className={activeTab === "edit" ? "active" : ""}
             onClick={() => setActiveTab("edit")}
           >
-            محرر التنسيق واللوجوهات
+            محرر النص واللوجوهات
           </button>
           <button
             type="button"
             className={activeTab === "preview" ? "active" : ""}
             onClick={() => setActiveTab("preview")}
           >
-            <Eye size={14} /> معاينة شكل الوصف
+            <Eye style={{ width: 14, height: 14 }} /> معاينة شكل الوصف
           </button>
           <button
             type="button"
             className={activeTab === "html" ? "active" : ""}
             onClick={() => setActiveTab("html")}
           >
-            <Code size={14} /> كود HTML
+            <Code style={{ width: 14, height: 14 }} /> كود HTML
           </button>
         </div>
       </div>
@@ -148,13 +147,13 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
           <div className="rich-editor-toolbar">
             <div className="toolbar-group">
               <button type="button" onClick={() => execCmd("bold")} title="خط عريض Bold">
-                <Bold size={15} />
+                <Bold style={{ width: 14, height: 14 }} />
               </button>
               <button type="button" onClick={() => execCmd("italic")} title="خط مائل Italic">
-                <Italic size={15} />
+                <Italic style={{ width: 14, height: 14 }} />
               </button>
               <button type="button" onClick={() => execCmd("underline")} title="تحته خط Underline">
-                <Underline size={15} />
+                <Underline style={{ width: 14, height: 14 }} />
               </button>
             </div>
 
@@ -162,13 +161,13 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
 
             <div className="toolbar-group">
               <button type="button" onClick={() => execCmd("formatBlock", "<h2>")} title="عنوان رئيسي H2">
-                <Heading1 size={15} />
+                <Heading1 style={{ width: 14, height: 14 }} />
               </button>
               <button type="button" onClick={() => execCmd("formatBlock", "<h3>")} title="عنوان فرعي H3">
-                <Heading2 size={15} />
+                <Heading2 style={{ width: 14, height: 14 }} />
               </button>
               <button type="button" onClick={() => execCmd("formatBlock", "<p>")} title="فقرة عادية">
-                <AlignLeft size={15} />
+                <AlignLeft style={{ width: 14, height: 14 }} />
               </button>
             </div>
 
@@ -176,10 +175,10 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
 
             <div className="toolbar-group">
               <button type="button" onClick={() => execCmd("insertUnorderedList")} title="قائمة نقطية">
-                <List size={15} />
+                <List style={{ width: 14, height: 14 }} />
               </button>
               <button type="button" onClick={() => execCmd("insertOrderedList")} title="قائمة رقمية">
-                <ListOrdered size={15} />
+                <ListOrdered style={{ width: 14, height: 14 }} />
               </button>
             </div>
 
@@ -190,17 +189,15 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
                 type="button" 
                 className="logo-picker-btn"
                 onClick={() => setShowLogoPicker(!showLogoPicker)}
-                title="إدراج أيقونات ولوجوهات العقار"
               >
-                <Sparkles size={15} /> 🌟 إدراج أيقونة / لوجو
+                <Sparkles style={{ width: 14, height: 14, color: "#d97706" }} /> إضافة لوجو/أيقونة عقار
               </button>
 
               <button 
                 type="button" 
                 onClick={() => setShowCustomLogoModal(true)}
-                title="إدراج صورة لوجو برابط مخصص"
               >
-                <ImageIcon size={15} /> لوجو مخصص
+                <ImageIcon style={{ width: 14, height: 14 }} /> لوجو برابط مخصص
               </button>
             </div>
           </div>
@@ -208,7 +205,7 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
           {showLogoPicker && (
             <div className="logo-picker-grid">
               <div className="logo-picker-title">
-                <strong>اختر الأيقونة أو الشارة لإدراجها في الوصف:</strong>
+                <span>اختر الأيقونة أو اللوجو لإدراجها في النص:</span>
                 <button type="button" onClick={() => setShowLogoPicker(false)}>×</button>
               </div>
               <div className="logo-badges-list">
@@ -234,14 +231,14 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
             contentEditable
             onInput={updateContent}
             onBlur={updateContent}
-            dir="auto"
+            dir="rtl"
             data-placeholder="اكتب وصف العقار هنا، يمكنك تنسيق النصوص وإضافة اللوجوهات والشارات الخاصة بالخدمات والمزايا..."
           />
         </div>
       )}
 
       {activeTab === "preview" && (
-        <div className="rich-editor-preview prose dir-rtl">
+        <div className="rich-editor-preview prose" dir="rtl">
           {htmlContent ? (
             <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
           ) : (
@@ -265,7 +262,7 @@ export function RichEditor({ value, onChange, label = "الوصف التفصيل
 
       {showCustomLogoModal && (
         <div className="custom-logo-modal-overlay">
-          <div className="custom-logo-modal">
+          <div className="custom-logo-modal" dir="rtl">
             <h3>إدراج لوجو مخصص برابط صورة</h3>
             <p>أدخل رابط صورة اللوجو (Logo URL) والنص الذي يظهر بجانبه:</p>
             <label>
