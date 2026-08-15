@@ -10,6 +10,7 @@ import { CopyButton } from "@/components/copy-button";
 
 import { PropertyGallery } from "@/components/property-gallery";
 import { PropertyInquirySection } from "@/components/property-inquiry";
+import { getLocalizedPropertyContent } from "@/lib/auto-translate";
 
 export default async function PropertyPage({params}:{params:Promise<{locale:string,slug:string}>}) {
   const {locale,slug}=await params;
@@ -21,15 +22,17 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
   }
   const related=(await getProperties(locale)).filter(x=>x.slug!==slug && x.slug!==decodedSlug).slice(0,3);
 
+  const content = getLocalizedPropertyContent(p.title, p.description, p.propertyType, p.location, locale);
+
   return <main dir={locale==="ar"?"rtl":"ltr"} className={locale==="ar"?"arabic inner-page":"inner-page"}>
     <Header locale={locale} overlay={false}/>
     
-    <PropertyGallery images={p.images} title={p.title} locale={locale} />
+    <PropertyGallery images={p.images} title={content.title} locale={locale} />
 
     <section className="detail-head section">
       <div>
-        <p className="section-label">{p.propertyType} · REF {p.referenceNumber}</p>
-        <h1>{p.title}</h1>
+        <p className="section-label">{content.propertyTypeLabel} · REF {p.referenceNumber}</p>
+        <h1>{content.title}</h1>
         <p><MapPin/> {p.location}</p>
       </div>
       <div className="detail-price" style={{ display: "flex", flexDirection: "row", gap: "12px", alignItems: "center" }}>
@@ -49,8 +52,8 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
     </section>
     <section className="detail-content section">
       <div className="detail-copy">
-        <h2>{p.title}</h2>
-        <div className="rich-description-body prose" dangerouslySetInnerHTML={{ __html: p.description }} />
+        <h2>{content.title}</h2>
+        <div className="rich-description-body prose" dangerouslySetInnerHTML={{ __html: content.description }} />
         <h3>{t(locale,"Features & amenities","المزايا والخدمات")}</h3>
         <div className="amenities">{["Private pool","Landscaped garden","24/7 security","Covered parking"].map(x=><span key={x}><Check/> {t(locale, x, x)}</span>)}</div>
       </div>
