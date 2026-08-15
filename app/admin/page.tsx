@@ -148,6 +148,11 @@ export default function Admin(){
 
   async function startEditProperty(propertyCard: PropertyCardData) {
     setError("");
+    setActive("Properties");
+    setShowForm(true);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     try {
       const detail = await adminFetch<PropertyDetailData>(`properties/${propertyCard.id}?locale=en`);
       setEditingProperty(detail);
@@ -161,7 +166,6 @@ export default function Admin(){
         images: propertyCard.coverImage ? [propertyCard.coverImage] : []
       });
     }
-    setShowForm(true);
   }
 
   const filteredCompanies=useMemo(()=>companies.filter(c=>`${c.name} ${c.legalName||""} ${c.slug}`.toLowerCase().includes(search.toLowerCase())),[companies,search]);
@@ -169,7 +173,7 @@ export default function Admin(){
   const available=properties.filter(p=>p.status==="Available").length;
 
   return <main className="admin-shell" dir="ltr"><aside className="admin-sidebar"><Link className="admin-brand" href="/en"><strong>NUVEXA</strong><small>ADMINISTRATION</small></Link><nav>{nav.map(([Icon,label])=><button key={label} className={active===label?"active":""} onClick={()=>{setActive(label);setShowForm(false);setEditingProperty(null);setError("");}}><Icon/>{label}</button>)}</nav><div className="admin-user"><span>ME</span><div><strong>Administrator</strong><small>Authorized user</small></div><ChevronDown/></div></aside><section className="admin-main"><header><button className="admin-menu"><Menu/></button><div><Search/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={`Search ${active.toLowerCase()}...`}/></div><Link href="/en" target="_blank"><Globe2/> View website</Link></header><div className="admin-content"><div className="admin-title"><div><p>NUVEXA CRM</p><h1>{active}</h1></div>{["Properties","Companies"].includes(active)&&<button onClick={()=>{ setEditingProperty(null); setShowForm(!showForm); }}><Plus/> Add {active==="Properties"?"property":"company"}</button>}</div>{notice&&<p className="admin-notice">{notice}</p>}{error&&<p className="admin-error">{error}</p>}
-  {active==="Dashboard"&&<><div className="stat-grid">{[["Total properties",properties.length,"Database inventory"],["Available",available,"Ready for sale"],["Inquiries / Leads",inquiries.length,"Customer requests"],["Companies",companies.length,"Active partners"]].map(x=><article key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong><small>{x[2]}</small></article>)}</div><PropertyTable properties={properties} onEdit={startEditProperty} onDelete={deleteProperty} onStatusChange={changeStatus}/></>}
+  {active==="Dashboard"&&<>{showForm&&<PropertyForm lookups={lookups} onSubmit={saveProperty} submitting={submitting} initialData={editingProperty}/>}<div className="stat-grid">{[["Total properties",properties.length,"Database inventory"],["Available",available,"Ready for sale"],["Inquiries / Leads",inquiries.length,"Customer requests"],["Companies",companies.length,"Active partners"]].map(x=><article key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong><small>{x[2]}</small></article>)}</div><PropertyTable properties={properties} onEdit={startEditProperty} onDelete={deleteProperty} onStatusChange={changeStatus}/></>}
   {active==="Inquiries"&&<InquiriesTable inquiries={inquiries}/>}
   {active==="Properties"&&<>{showForm&&<PropertyForm lookups={lookups} onSubmit={saveProperty} submitting={submitting} initialData={editingProperty}/>}<PropertyTable properties={properties} onEdit={startEditProperty} onDelete={deleteProperty} onStatusChange={changeStatus}/></>}
   {active==="Companies"&&<>{showForm&&<CompanyForm onSubmit={createCompany} submitting={submitting}/>}<section className="company-grid">{filteredCompanies.map(c=><article key={c.id}>{c.logoUrl?<img src={c.logoUrl} alt={`${c.name} logo`}/>:<div className="company-logo">{c.name.slice(0,2).toUpperCase()}</div>}<h2>{c.name}</h2><p>{c.description||c.legalName||"No description"}</p><dl><div><dt>Properties</dt><dd>{c.propertyCount}</dd></div><div><dt>Phone</dt><dd>{c.phone||"—"}</dd></div><div><dt>Email</dt><dd>{c.email||"—"}</dd></div></dl>{c.website&&<a href={c.website} target="_blank" rel="noreferrer">Open website</a>}</article>)}</section></>}
