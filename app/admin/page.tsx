@@ -229,7 +229,20 @@ function PropertyForm({lookups,onSubmit,submitting,initialData}:{lookups:Lookups
   }, [initialData]);
 
   const countriesList = lookups.countries.length > 0 ? lookups.countries : [{ id: "11111111-1111-1111-1111-111111111111", name: "Egypt / مصر" }];
-  const citiesList = lookups.cities.length > 0 ? lookups.cities : [{ id: "22222222-2222-2222-2222-222222222222", name: "Cairo / القاهرة" }];
+  const citiesList = lookups.cities.length > 0 ? lookups.cities : [
+    { id: "22222222-2222-2222-2222-222222222222", name: "Hurghada / الغردقة" },
+    { id: "33333333-3333-3333-3333-333333333333", name: "Sahl Hasheesh / سهل حشيش" },
+    { id: "44444444-4444-4444-4444-444444444444", name: "El Gouna / الجونة" },
+    { id: "55555555-5555-5555-5555-555555555555", name: "Soma Bay / سوما باي" },
+    { id: "66666666-6666-6666-6666-666666666666", name: "Makadi Bay / مكادي باي" },
+    { id: "77777777-7777-7777-7777-777777777777", name: "Ain Sokhna / العين السخنة" },
+    { id: "88888888-8888-8888-8888-888888888888", name: "North Coast / الساحل الشمالي" },
+    { id: "99999999-9999-9999-9999-999999999999", name: "Cairo / القاهرة" },
+    { id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", name: "New Cairo / التجمع الخامس" },
+    { id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", name: "Sheikh Zayed / الشيخ زايد" },
+    { id: "cccccccc-cccc-cccc-cccc-cccccccccccc", name: "Sharm El Sheikh / شرم الشيخ" },
+    { id: "dddddddd-dddd-dddd-dddd-dddddddddddd", name: "Alexandria / الإسكندرية" }
+  ];
 
   const handleTitleChange = (val: string) => {
     setTitleVal(val);
@@ -316,7 +329,13 @@ function PropertyForm({lookups,onSubmit,submitting,initialData}:{lookups:Lookups
       <label>Purpose (الغرض)<select name="listingPurpose"><option value="Sale">Sale (بيع)</option><option value="Rent">Rent (إيجار)</option></select></label>
       
       <label>Price (السعر الإجمالي)<input name="price" type="number" min="0" defaultValue={initialData?.price ?? 0} placeholder="0"/></label>
-      <label>Currency (العملة)<input name="currency" defaultValue={initialData?.currency || "EGP"} minLength={3} maxLength={3}/></label>
+      <label>Currency (العملة)
+        <select name="currency" defaultValue={initialData?.currency || "EGP"}>
+          <option value="EGP">EGP (جنيه مصري - ج.م)</option>
+          <option value="EUR">EUR (يورو - €)</option>
+          <option value="USD">USD (دولار أمريكي - $)</option>
+        </select>
+      </label>
       <label>Area m² (المساحة م²)<input name="areaM2" type="number" min="0" defaultValue={initialData?.areaM2 ?? 0} placeholder="0"/></label>
 
       <label>Bedrooms (الغرف)<input name="bedrooms" type="number" min="0" defaultValue={initialData?.bedrooms ?? ""} placeholder="اختياري"/></label>
