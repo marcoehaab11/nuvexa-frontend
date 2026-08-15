@@ -10,7 +10,19 @@ import { ImageUploader } from "@/components/image-uploader";
 type Option={id:string;name:string;parentId?:string|null};
 type Lookups={countries:Option[];cities:Option[];companies:CompanySummaryData[]};
 const nav=[[LayoutDashboard,"Dashboard"],[Home,"Properties"],[Building2,"Companies"],[MapPin,"Locations"],[Languages,"Languages"],[Users,"Users"],[Settings,"Site settings"]] as const;
-async function adminFetch<T>(path:string,init?:RequestInit):Promise<T>{const response=await fetch(`/api/backend/admin/${path}`,{credentials:"include",...init,headers:{"Content-Type":"application/json",...(init?.headers||{})}});if(!response.ok){const body=await response.json().catch(()=>({}));throw new Error(body.message||`Request failed (${response.status})`);}return response.status===204?undefined as T:response.json();}
+async function adminFetch<T>(path:string,init?:RequestInit):Promise<T>{
+  const response=await fetch(`/api/backend/admin/${path}`,{credentials:"include",...init,headers:{"Content-Type":"application/json",...(init?.headers||{})}});
+  if(!response.ok){
+    const body=await response.json().catch(()=>({}));
+    let msg = body.message || body.detail || body.title;
+    if (body.errors && typeof body.errors === "object") {
+      const errList = Object.entries(body.errors).map(([field, errs]) => `${field}: ${(errs as string[]).join(", ")}`);
+      msg = `خطأ في البيانات المُدخلة (${response.status}): ${errList.join(" | ")}`;
+    }
+    throw new Error(msg || `فشلت العملية برمز الخطأ (${response.status})`);
+  }
+  return response.status===204?undefined as T:response.json();
+}
 
 export default function Admin(){
   const[active,setActive]=useState("Dashboard");const[auth,setAuth]=useState<"loading"|"in"|"out">("loading");const[error,setError]=useState("");
@@ -21,42 +33,52 @@ export default function Admin(){
   async function login(e:FormEvent<HTMLFormElement>){e.preventDefault();setError("");const data=new FormData(e.currentTarget);const response=await fetch("/api/admin/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({email:data.get("email"),password:data.get("password")})});if(response.ok){setAuth("in");await load();}else setError("Unable to sign in. Check your credentials and API configuration.");}
   async function createCompany(e:FormEvent<HTMLFormElement>){e.preventDefault();setError("");const d=new FormData(e.currentTarget);try{await adminFetch("companies",{method:"POST",body:JSON.stringify({name:d.get("name"),slug:d.get("slug"),legalName:d.get("legalName")||null,logoUrl:d.get("logoUrl")||null,website:d.get("website")||null,email:d.get("email")||null,phone:d.get("phone")||null,address:d.get("address")||null,description:d.get("description")||null,isActive:true})});setNotice("Company added successfully.");setShowForm(false);await load();}catch(e){setError(e instanceof Error?e.message:"Unable to add company.");}}
   async function createProperty(e:FormEvent<HTMLFormElement>){
-    e.preventDefault();setError("");const d=new FormData(e.currentTarget);
+    e.preventDefault();setError("");
+    const d=new FormData(e.currentTarget);
+    const title=d.get("title")?.toString().trim();
+    if (!title) {
+      setError("يرجى إدخال اسم العقار أولاً.");
+      return;
+    }
     const imageUrls=d.getAll("imageUrls").map(x=>x.toString()).filter(Boolean);
     const coverImageUrl=d.get("coverImageUrl")?.toString()||imageUrls[0]||"";
     const isInstallmentAvailable=d.get("isInstallmentAvailable")==="on";
     const downPayment=d.get("downPayment")?Number(d.get("downPayment")):null;
     const installmentYears=d.get("installmentYears")?Number(d.get("installmentYears")):null;
     const monthlyInstallment=d.get("monthlyInstallment")?Number(d.get("monthlyInstallment")):null;
+    const countryIdVal=d.get("countryId")?.toString();
+    const cityIdVal=d.get("cityId")?.toString();
+    const companyIdVal=d.get("companyId")?.toString();
+
     try{
       await adminFetch("properties",{method:"POST",body:JSON.stringify({
-        referenceNumber:d.get("referenceNumber"),
-        companyId:d.get("companyId")||null,
-        propertyType:d.get("propertyType"),
-        listingPurpose:d.get("listingPurpose"),
-        price:Number(d.get("price")),
-        currency:d.get("currency"),
-        areaM2:Number(d.get("areaM2")),
-        bedrooms:Number(d.get("bedrooms"))||null,
-        bathrooms:Number(d.get("bathrooms"))||null,
-        countryId:d.get("countryId"),
-        cityId:d.get("cityId"),
+        referenceNumber:d.get("referenceNumber")||null,
+        companyId:companyIdVal && companyIdVal !== "" ? companyIdVal : null,
+        propertyType:d.get("propertyType")||"Apartment",
+        listingPurpose:d.get("listingPurpose")||"Sale",
+        price:Number(d.get("price"))||0,
+        currency:d.get("currency")||"EGP",
+        areaM2:Number(d.get("areaM2"))||0,
+        bedrooms:d.get("bedrooms")?Number(d.get("bedrooms")):null,
+        bathrooms:d.get("bathrooms")?Number(d.get("bathrooms")):null,
+        countryId:countryIdVal && countryIdVal !== "" ? countryIdVal : null,
+        cityId:cityIdVal && cityIdVal !== "" ? cityIdVal : null,
         address:d.get("address")||null,
         coverImageUrl:coverImageUrl,
         imageUrls:imageUrls,
         sourceLanguage:"en",
-        title:d.get("title"),
-        slug:d.get("slug"),
-        description:d.get("description"),
+        title:title,
+        slug:d.get("slug")||null,
+        description:d.get("description")||null,
         isInstallmentAvailable:isInstallmentAvailable,
         downPayment:downPayment,
         installmentYears:installmentYears,
         monthlyInstallment:monthlyInstallment
       })});
-      setNotice("Property added and published successfully.");
+      setNotice("تمت إضافة العقار ونشره بنجاح!");
       setShowForm(false);
       await load();
-    }catch(e){setError(e instanceof Error?e.message:"Unable to add property.");}
+    }catch(e){setError(e instanceof Error?e.message:"تعذر إضافة العقار، يرجى التثبت من البيانات.");}
   }
   const filteredCompanies=useMemo(()=>companies.filter(c=>`${c.name} ${c.legalName||""} ${c.slug}`.toLowerCase().includes(search.toLowerCase())),[companies,search]);
   if(auth!=="in")return <main className="admin-login"><form onSubmit={login}><Link className="admin-brand" href="/en"><strong>NUVEXA</strong><small>ADMINISTRATION</small></Link><div className="login-mark"><LockKeyhole/></div><h1>{auth==="loading"?"Checking your session":"Welcome back"}</h1><p>{auth==="loading"?"Please wait…":"Sign in with your administrator account."}</p>{auth==="out"&&<><label>Email<input name="email" type="email" required/></label><label>Password<input name="password" type="password" required/></label>{error&&<span className="login-error">{error}</span>}<button type="submit">Sign in securely</button></>}</form></main>;
