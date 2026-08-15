@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { FormEvent,useCallback,useEffect,useMemo,useState } from "react";
-import { Building2,ChevronDown,Globe2,Home,Languages,LayoutDashboard,LockKeyhole,MapPin,Menu,Plus,Search,Settings,Users } from "lucide-react";
+import { Building2,ChevronDown,Globe2,Home,Languages,LayoutDashboard,LockKeyhole,MapPin,Menu,Plus,Search,Settings,Users,Loader2 } from "lucide-react";
 import type { CompanyData,CompanySummaryData,PropertyCardData } from "@/lib/api";
 
 import { RichEditor } from "@/components/rich-editor";
@@ -28,10 +28,20 @@ export default function Admin(){
   const[active,setActive]=useState("Dashboard");const[auth,setAuth]=useState<"loading"|"in"|"out">("loading");const[error,setError]=useState("");
   const[properties,setProperties]=useState<PropertyCardData[]>([]);const[companies,setCompanies]=useState<CompanyData[]>([]);const[lookups,setLookups]=useState<Lookups>({countries:[],cities:[],companies:[]});
   const[showForm,setShowForm]=useState(false);const[search,setSearch]=useState("");const[notice,setNotice]=useState("");
+  const[submitting,setSubmitting]=useState(false);
+
   const load=useCallback(async()=>{const[p,c,l]=await Promise.all([adminFetch<PropertyCardData[]>("properties?locale=en"),adminFetch<CompanyData[]>("companies"),adminFetch<Lookups>("lookups?locale=en")]);setProperties(p);setCompanies(c);setLookups(l);},[]);
   useEffect(()=>{fetch("/api/admin/auth/me",{credentials:"include"}).then(async r=>{if(!r.ok){setAuth("out");return;}setAuth("in");await load().catch(e=>setError(e.message));}).catch(()=>setAuth("out"));},[load]);
   async function login(e:FormEvent<HTMLFormElement>){e.preventDefault();setError("");const data=new FormData(e.currentTarget);const response=await fetch("/api/admin/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({email:data.get("email"),password:data.get("password")})});if(response.ok){setAuth("in");await load();}else setError("Unable to sign in. Check your credentials and API configuration.");}
-  async function createCompany(e:FormEvent<HTMLFormElement>){e.preventDefault();setError("");const d=new FormData(e.currentTarget);try{await adminFetch("companies",{method:"POST",body:JSON.stringify({name:d.get("name"),slug:d.get("slug"),legalName:d.get("legalName")||null,logoUrl:d.get("logoUrl")||null,website:d.get("website")||null,email:d.get("email")||null,phone:d.get("phone")||null,address:d.get("address")||null,description:d.get("description")||null,isActive:true})});setNotice("Company added successfully.");setShowForm(false);await load();}catch(e){setError(e instanceof Error?e.message:"Unable to add company.");}}
+  async function createCompany(e:FormEvent<HTMLFormElement>){
+    e.preventDefault();setError("");setSubmitting(true);
+    const d=new FormData(e.currentTarget);
+    try{
+      await adminFetch("companies",{method:"POST",body:JSON.stringify({name:d.get("name"),slug:d.get("slug"),legalName:d.get("legalName")||null,logoUrl:d.get("logoUrl")||null,website:d.get("website")||null,email:d.get("email")||null,phone:d.get("phone")||null,address:d.get("address")||null,description:d.get("description")||null,isActive:true})});
+      setNotice("Company added successfully.");setShowForm(false);await load();
+    }catch(e){setError(e instanceof Error?e.message:"Unable to add company.");}
+    finally{setSubmitting(false);}
+  }
   async function createProperty(e:FormEvent<HTMLFormElement>){
     e.preventDefault();setError("");
     const d=new FormData(e.currentTarget);
@@ -40,6 +50,7 @@ export default function Admin(){
       setError("يرجى إدخال اسم العقار أولاً.");
       return;
     }
+    setSubmitting(true);
     const imageUrls=d.getAll("imageUrls").map(x=>x.toString()).filter(Boolean);
     const coverImageUrl=d.get("coverImageUrl")?.toString()||imageUrls[0]||"";
     const isInstallmentAvailable=d.get("isInstallmentAvailable")==="on";
@@ -79,20 +90,21 @@ export default function Admin(){
       setShowForm(false);
       await load();
     }catch(e){setError(e instanceof Error?e.message:"تعذر إضافة العقار، يرجى التثبت من البيانات.");}
+    finally{setSubmitting(false);}
   }
   const filteredCompanies=useMemo(()=>companies.filter(c=>`${c.name} ${c.legalName||""} ${c.slug}`.toLowerCase().includes(search.toLowerCase())),[companies,search]);
   if(auth!=="in")return <main className="admin-login"><form onSubmit={login}><Link className="admin-brand" href="/en"><strong>NUVEXA</strong><small>ADMINISTRATION</small></Link><div className="login-mark"><LockKeyhole/></div><h1>{auth==="loading"?"Checking your session":"Welcome back"}</h1><p>{auth==="loading"?"Please wait…":"Sign in with your administrator account."}</p>{auth==="out"&&<><label>Email<input name="email" type="email" required/></label><label>Password<input name="password" type="password" required/></label>{error&&<span className="login-error">{error}</span>}<button type="submit">Sign in securely</button></>}</form></main>;
   const available=properties.filter(p=>p.status==="Available").length;
   return <main className="admin-shell" dir="ltr"><aside className="admin-sidebar"><Link className="admin-brand" href="/en"><strong>NUVEXA</strong><small>ADMINISTRATION</small></Link><nav>{nav.map(([Icon,label])=><button key={label} className={active===label?"active":""} onClick={()=>{setActive(label);setShowForm(false);setError("");}}><Icon/>{label}</button>)}</nav><div className="admin-user"><span>ME</span><div><strong>Administrator</strong><small>Authorized user</small></div><ChevronDown/></div></aside><section className="admin-main"><header><button className="admin-menu"><Menu/></button><div><Search/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={`Search ${active.toLowerCase()}...`}/></div><Link href="/en" target="_blank"><Globe2/> View website</Link></header><div className="admin-content"><div className="admin-title"><div><p>NUVEXA CRM</p><h1>{active}</h1></div>{["Properties","Companies"].includes(active)&&<button onClick={()=>setShowForm(!showForm)}><Plus/> Add {active==="Properties"?"property":"company"}</button>}</div>{notice&&<p className="admin-notice">{notice}</p>}{error&&<p className="admin-error">{error}</p>}
   {active==="Dashboard"&&<><div className="stat-grid">{[["Total properties",properties.length,"Database inventory"],["Available",available,"Ready for sale"],["Companies",companies.length,"Active partners"]].map(x=><article key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong><small>{x[2]}</small></article>)}</div><PropertyTable properties={properties}/></>}
-  {active==="Properties"&&<>{showForm&&<PropertyForm lookups={lookups} onSubmit={createProperty}/>}<PropertyTable properties={properties}/></>}
-  {active==="Companies"&&<>{showForm&&<CompanyForm onSubmit={createCompany}/>}<section className="company-grid">{filteredCompanies.map(c=><article key={c.id}>{c.logoUrl?<img src={c.logoUrl} alt={`${c.name} logo`}/>:<div className="company-logo">{c.name.slice(0,2).toUpperCase()}</div>}<h2>{c.name}</h2><p>{c.description||c.legalName||"No description"}</p><dl><div><dt>Properties</dt><dd>{c.propertyCount}</dd></div><div><dt>Phone</dt><dd>{c.phone||"—"}</dd></div><div><dt>Email</dt><dd>{c.email||"—"}</dd></div></dl>{c.website&&<a href={c.website} target="_blank" rel="noreferrer">Open website</a>}</article>)}</section></>}
+  {active==="Properties"&&<>{showForm&&<PropertyForm lookups={lookups} onSubmit={createProperty} submitting={submitting}/>}<PropertyTable properties={properties}/></>}
+  {active==="Companies"&&<>{showForm&&<CompanyForm onSubmit={createCompany} submitting={submitting}/>}<section className="company-grid">{filteredCompanies.map(c=><article key={c.id}>{c.logoUrl?<img src={c.logoUrl} alt={`${c.name} logo`}/>:<div className="company-logo">{c.name.slice(0,2).toUpperCase()}</div>}<h2>{c.name}</h2><p>{c.description||c.legalName||"No description"}</p><dl><div><dt>Properties</dt><dd>{c.propertyCount}</dd></div><div><dt>Phone</dt><dd>{c.phone||"—"}</dd></div><div><dt>Email</dt><dd>{c.email||"—"}</dd></div></dl>{c.website&&<a href={c.website} target="_blank" rel="noreferrer">Open website</a>}</article>)}</section></>}
   {!['Dashboard','Properties','Companies'].includes(active)&&<div className="module-placeholder"><div><Home/><h2>{active} workspace</h2><p>This module uses protected ASP.NET Core admin endpoints.</p></div></div>}</div></section></main>;
 }
 
 function PropertyTable({properties}:{properties:PropertyCardData[]}){return <div className="admin-panels single"><section><div className="panel-title"><h2>Properties</h2><span>{properties.length} records</span></div><table><thead><tr><th>PROPERTY</th><th>COMPANY</th><th>LOCATION</th><th>PRICE</th><th>STATUS</th></tr></thead><tbody>{properties.map(p=><tr key={p.id}><td><img src={p.coverImage||"/placeholder-property.svg"} alt=""/><div><strong>{p.title}</strong><small>{p.referenceNumber}</small></div></td><td>{p.company?.name||"Independent"}</td><td>{p.location}</td><td>{new Intl.NumberFormat("en-EG",{style:"currency",currency:p.currency,maximumFractionDigits:0}).format(p.price)}</td><td><span className="status">{p.status}</span></td></tr>)}</tbody></table></section></div>}
-function CompanyForm({onSubmit}:{onSubmit:(e:FormEvent<HTMLFormElement>)=>void}){return <form className="admin-form" onSubmit={onSubmit}><h2>Add real-estate company</h2><div className="form-grid"><label>Display name<input name="name" required/></label><label>Slug<input name="slug" required pattern="[a-z0-9-]+" placeholder="company-name"/></label><label>Legal name<input name="legalName"/></label><label>Logo URL<input name="logoUrl" type="url"/></label><label>Website<input name="website" type="url"/></label><label>Email<input name="email" type="email"/></label><label>Phone<input name="phone"/></label><label>Address<input name="address"/></label><label className="wide">Description<textarea name="description" rows={3}/></label></div><button type="submit">Save company</button></form>}
-function PropertyForm({lookups,onSubmit}:{lookups:Lookups;onSubmit:(e:FormEvent<HTMLFormElement>)=>void}){
+function CompanyForm({onSubmit,submitting}:{onSubmit:(e:FormEvent<HTMLFormElement>)=>void;submitting?:boolean}){return <form className="admin-form" onSubmit={onSubmit}><h2>Add real-estate company</h2><div className="form-grid"><label>Display name<input name="name" required/></label><label>Slug<input name="slug" required pattern="[a-z0-9-]+" placeholder="company-name"/></label><label>Legal name<input name="legalName"/></label><label>Logo URL<input name="logoUrl" type="url"/></label><label>Website<input name="website" type="url"/></label><label>Email<input name="email" type="email"/></label><label>Phone<input name="phone"/></label><label>Address<input name="address"/></label><label className="wide">Description<textarea name="description" rows={3}/></label></div><button type="submit" disabled={submitting}>{submitting?"Saving...":"Save company"}</button></form>}
+function PropertyForm({lookups,onSubmit,submitting}:{lookups:Lookups;onSubmit:(e:FormEvent<HTMLFormElement>)=>void;submitting?:boolean}){
   const [images, setImages] = useState<string[]>([]);
   const [coverImage, setCoverImage] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -175,6 +187,31 @@ function PropertyForm({lookups,onSubmit}:{lookups:Lookups;onSubmit:(e:FormEvent<
         <RichEditor value={description} onChange={setDescription} required={false}/>
       </div>
     </div>
-    <button type="submit" style={{ cursor: "pointer", background: "#c9a44a", color: "#fff", fontWeight: 600, padding: "14px 28px", borderRadius: 4, border: 0, marginTop: 18 }}>حفظ ونشر العقار فوراً</button>
+    <button 
+      type="submit" 
+      disabled={submitting}
+      style={{ 
+        cursor: submitting ? "not-allowed" : "pointer", 
+        background: submitting ? "#94a3b8" : "#c9a44a", 
+        color: "#fff", 
+        fontWeight: 600, 
+        padding: "14px 28px", 
+        borderRadius: 4, 
+        border: 0, 
+        marginTop: 18,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "8px"
+      }}
+    >
+      {submitting ? (
+        <>
+          <Loader2 className="animate-spin" style={{ width: 18, height: 18 }} />
+          <span>جاري الحفظ والنشر... يرجى الانتظار</span>
+        </>
+      ) : (
+        <span>حفظ ونشر العقار فوراً</span>
+      )}
+    </button>
   </form>;
 }
