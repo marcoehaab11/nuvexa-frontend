@@ -8,6 +8,9 @@ import { notFound } from "next/navigation";
 import { PropertyCard } from "@/components/property-card";
 import { CopyButton } from "@/components/copy-button";
 
+import { PropertyGallery } from "@/components/property-gallery";
+import { PropertyInquirySection } from "@/components/property-inquiry";
+
 export default async function PropertyPage({params}:{params:Promise<{locale:string,slug:string}>}) {
   const {locale,slug}=await params;
   if(!isLocale(locale)) notFound();
@@ -17,15 +20,11 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
     try { p=await getProperty(locale,slug); } catch { notFound(); }
   }
   const related=(await getProperties(locale)).filter(x=>x.slug!==slug && x.slug!==decodedSlug).slice(0,3);
-  const gallery=p.images.length?p.images:["/placeholder-property.svg"];
+
   return <main dir={locale==="ar"?"rtl":"ltr"} className={locale==="ar"?"arabic inner-page":"inner-page"}>
     <Header locale={locale} overlay={false}/>
-    <section className="detail-gallery-container">
-      <div className={`detail-gallery count-${Math.min(gallery.length, 6)}`}>
-        {gallery.map((image,i)=><img key={`${image}-${i}`} className={i===0?"detail-main":undefined} src={image} alt={`${p.title} - ${i+1}`}/>)}
-      </div>
-      {gallery.length > 1 && <span className="gallery-count-badge">📸 {gallery.length} {t(locale,"Photos","صور")}</span>}
-    </section>
+    
+    <PropertyGallery images={p.images} title={p.title} locale={locale} />
 
     <section className="detail-head section">
       <div>
@@ -89,6 +88,8 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
         )}
       </aside>
     </section>
+
+    <PropertyInquirySection propertyId={p.id} propertyTitle={p.title} locale={locale} />
     <section className="map-placeholder">
       <div>
         <MapPin/>

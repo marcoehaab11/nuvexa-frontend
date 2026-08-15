@@ -35,27 +35,29 @@ export function ImageUploader({ images, onChange, coverImageUrl, onCoverChange }
     if (!urlToAdd) setInputUrl("");
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    const newUrls: string[] = [];
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const dataUrl = event.target.result as string;
-          newUrls.push(dataUrl);
-          if (newUrls.length === files.length) {
-            const nextImages = [...images, ...newUrls];
-            onChange(nextImages);
-            if (!coverImageUrl && onCoverChange && nextImages.length > 0) {
-              onCoverChange(nextImages[0]);
-            }
-          }
-        }
-      };
-      reader.readAsDataURL(file);
+
+    const filePromises = Array.from(files).map((file) => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          resolve((event.target?.result as string) || "");
+        };
+        reader.onerror = () => resolve("");
+        reader.readAsDataURL(file);
+      });
     });
+
+    const uploadedDataUrls = (await Promise.all(filePromises)).filter(Boolean);
+    if (uploadedDataUrls.length === 0) return;
+
+    const nextImages = [...images, ...uploadedDataUrls];
+    onChange(nextImages);
+    if (!coverImageUrl && onCoverChange && nextImages.length > 0) {
+      onCoverChange(nextImages[0]);
+    }
   };
 
   const removeImage = (index: number) => {
