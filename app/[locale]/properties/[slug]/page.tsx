@@ -33,12 +33,18 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
         <p><MapPin/> {p.location}</p>
       </div>
       <div className="detail-price" style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "flex-end" }}>
-        <div>
-          <small>{t(locale,"ASKING PRICE","السعر المطلوب")}</small>
-          <strong>{p.price > 0 ? new Intl.NumberFormat(locale==="ar"?"ar-EG":"en-EG",{style:"currency",currency:p.currency,maximumFractionDigits:0}).format(p.price) : (locale === "ar" ? "السعر عند الاتصال" : "Price on request")}</strong>
-          <span>{t(locale,"Available now","متاح الآن")}</span>
-        </div>
-        <CopyButton slug={p.slug} label="📋 نسخ رابط العقار للفيسبوك" />
+        {p.price > 0 ? (
+          <div>
+            <small>{t(locale,"ASKING PRICE","السعر المطلوب")}</small>
+            <strong>{new Intl.NumberFormat(locale==="ar"?"ar-EG":"en-EG",{style:"currency",currency:p.currency,maximumFractionDigits:0}).format(p.price)}</strong>
+            <span>{t(locale,"Available now","متاح الآن")}</span>
+          </div>
+        ) : (
+          <div style={{ background: "#fef3c7", color: "#b45309", padding: "8px 16px", borderRadius: "20px", fontWeight: "700", fontSize: "14px", border: "1px solid #fde68a" }}>
+            {locale === "ar" ? "السعر عند الاتصال" : "Price on Request"}
+          </div>
+        )}
+        <CopyButton slug={p.slug} variant="icon" />
       </div>
     </section>
     <section className="detail-content section">
@@ -90,14 +96,6 @@ export default async function PropertyPage({params}:{params:Promise<{locale:stri
     </section>
 
     <PropertyInquirySection propertyId={p.id} propertyTitle={p.title} locale={locale} />
-    <section className="map-placeholder">
-      <div>
-        <MapPin/>
-        <h2>{t(locale,"Perfectly placed","موقع مثالي")}</h2>
-        <p>{p.location}</p>
-        <a href={`/${locale}/map`}>{t(locale,"Explore on the map","استكشف على الخريطة")}</a>
-      </div>
-    </section>
     <section className="related section">
       <h2>{t(locale,"You may also like","قد يعجبك أيضاً")}</h2>
       <div className="property-grid">{related.map(x=><PropertyCard key={x.slug} property={x} locale={locale}/>)}</div>
