@@ -66,6 +66,58 @@ function PropertyForm({lookups,onSubmit}:{lookups:Lookups;onSubmit:(e:FormEvent<
   const [images, setImages] = useState<string[]>([]);
   const [coverImage, setCoverImage] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [titleVal, setTitleVal] = useState<string>("");
+  const [slugVal, setSlugVal] = useState<string>("");
 
-  return <form className="admin-form" onSubmit={onSubmit}><h2>Add property</h2><div className="form-grid"><label>Reference<input name="referenceNumber" required defaultValue={`REF-${Math.floor(1000 + Math.random() * 9000)}`}/></label><label>Company<select name="companyId"><option value="">Independent / no company</option>{lookups.companies.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>Title<input name="title" required/></label><label>Slug<input name="slug" required pattern="[a-z0-9-]+"/></label><label>Type<select name="propertyType">{["Apartment","Villa","Duplex","Penthouse","Townhouse","Chalet","Office","Retail","Commercial","Land"].map(x=><option key={x}>{x}</option>)}</select></label><label>Purpose<select name="listingPurpose"><option>Sale</option><option>Rent</option></select></label><label>Price<input name="price" type="number" min="0" required/></label><label>Currency<input name="currency" defaultValue="EGP" minLength={3} maxLength={3} required/></label><label>Area m²<input name="areaM2" type="number" min="1" required/></label><label>Bedrooms<input name="bedrooms" type="number" min="0"/></label><label>Bathrooms<input name="bathrooms" type="number" min="0"/></label><label>Country<select name="countryId" required><option value="">Select</option>{lookups.countries.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>City<select name="cityId" required><option value="">Select</option>{lookups.cities.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label><label>Address<input name="address"/></label><div className="wide"><ImageUploader images={images} onChange={setImages} coverImageUrl={coverImage} onCoverChange={setCoverImage}/></div><div className="wide"><RichEditor value={description} onChange={setDescription} required/></div></div><button type="submit">Save and publish property</button></form>;
+  const countriesList = lookups.countries.length > 0 ? lookups.countries : [{ id: "11111111-1111-1111-1111-111111111111", name: "Egypt / مصر" }];
+  const citiesList = lookups.cities.length > 0 ? lookups.cities : [{ id: "22222222-2222-2222-2222-222222222222", name: "Cairo / القاهرة" }];
+
+  const handleTitleChange = (val: string) => {
+    setTitleVal(val);
+    const autoSlug = val.trim().toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, "-").replace(/^-+|-+$/g, "");
+    setSlugVal(autoSlug);
+  };
+
+  return <form className="admin-form" onSubmit={onSubmit}>
+    <h2>Add new property (إضافة عقار جديد)</h2>
+    <div className="form-grid">
+      <label className="wide">Title (اسم العقار)<span style={{ color: "#ef4444", marginInlineStart: 4 }}>* (إجباري)</span>
+        <input 
+          name="title" 
+          value={titleVal} 
+          onChange={(e) => handleTitleChange(e.target.value)} 
+          required 
+          placeholder="مثال: شقة للبيع في التجمع الخامس بكومبوند مميز"
+        />
+      </label>
+
+      <label>Reference Code (الكود المرجعي)<input name="referenceNumber" defaultValue={`REF-${Math.floor(1000 + Math.random() * 9000)}`}/></label>
+      <label>Slug (الرابط)<input name="slug" value={slugVal} onChange={(e) => setSlugVal(e.target.value)} placeholder="شقة-للبيع-التجمع"/></label>
+      
+      <label>Company (الشركة)<select name="companyId"><option value="">Independent / لا ينتمي لشركة</option>{lookups.companies.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+      <label>Type (نوع العقار)<select name="propertyType">{["Apartment","Villa","Duplex","Penthouse","Townhouse","Chalet","Office","Retail","Commercial","Land"].map(x=><option key={x}>{x}</option>)}</select></label>
+      <label>Purpose (الغرض)<select name="listingPurpose"><option value="Sale">Sale (بيع)</option><option value="Rent">Rent (إيجار)</option></select></label>
+      
+      <label>Price (السعر)<input name="price" type="number" min="0" defaultValue="0" placeholder="0"/></label>
+      <label>Currency (العملة)<input name="currency" defaultValue="EGP" minLength={3} maxLength={3}/></label>
+      <label>Area m² (المساحة م²)<input name="areaM2" type="number" min="0" defaultValue="0" placeholder="0"/></label>
+
+      <label>Bedrooms (الغرف)<input name="bedrooms" type="number" min="0" placeholder="اختياري"/></label>
+      <label>Bathrooms (الحمامات)<input name="bathrooms" type="number" min="0" placeholder="اختياري"/></label>
+
+      <label>Country (البلد)<select name="countryId">{countriesList.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+      <label>City (المدينة)<select name="cityId">{citiesList.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+      
+      <label className="wide">Address / Detailed Location (العنوان المباشر)<input name="address" placeholder="مثال: الحي الخامس - ش الستين - بالقرب من المحور"/></label>
+
+      <div className="wide">
+        <ImageUploader images={images} onChange={setImages} coverImageUrl={coverImage} onCoverChange={setCoverImage}/>
+      </div>
+
+      <div className="wide">
+        <RichEditor value={description} onChange={setDescription} required={false}/>
+      </div>
+    </div>
+    <button type="submit" style={{ cursor: "pointer", background: "#c9a44a", color: "#fff", fontWeight: 600, padding: "14px 28px", borderRadius: 4, border: 0, marginTop: 18 }}>حفظ ونشر العقار فوراً</button>
+  </form>;
 }
